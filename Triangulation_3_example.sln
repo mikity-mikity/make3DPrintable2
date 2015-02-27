@@ -1,0 +1,25 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fast_location_3", "fast_location_3.vcxproj", "{46DC5BBC-7C37-49A7-903D-A8710269AF1A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		MinSizeRel|x64 = MinSizeRel|x64
+		Release|x64 = Release|x64
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.Debug|x64.ActiveCfg = Debug|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.Debug|x64.Build.0 = Debug|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.Release|x64.ActiveCfg = Release|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.Release|x64.Build.0 = Release|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{46DC5BBC-7C37-49A7-903D-A8710269AF1A}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

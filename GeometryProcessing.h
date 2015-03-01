@@ -323,7 +323,30 @@ namespace GeometryProcessing
 				vectorPool[f.C].push_back(eC);
 				i++;
 				if ((i / 10000) * 10000 == i)std::cout << i << endl;
-			}			//find pairs
+			}
+			//circulate vertices and count up errors
+			int count = 0;
+			for(int i=0;i<val->Vertices.size();i++)
+			{
+				auto pool=vectorPool[i];
+				vector<int> mm;
+				for(auto p:pool)
+				{
+					mm.push_back(p->next->P->N);
+				}
+				bool flag = true;
+				
+				std::set<int> set;
+				//std::vector<int> result;
+				for (auto it = mm.begin(); it !=mm.end(); ++it)
+				{
+					if (!set.insert(*it).second)
+						flag = false;//result.push_back(*it);
+				}
+				if (!flag)count++;
+			}
+			std::cout << count << "/" << val->Vertices.size() << endl;
+			//find pairs
 			/*for (auto h : halfedges)
 			{
 				int i = h->P->N;
@@ -331,7 +354,7 @@ namespace GeometryProcessing
 				//if (__halfedgeTable.coeff(i, j) != NULL) throw new ArgumentOutOfRangeException(";)");
 				__halfedgeTable.coeffRef(i, j) = h;
 			}*/
-			for (auto h : halfedges)
+			/*for (auto h : halfedges)
 			{
 				int i = h->P->N;
 				int j = h->next->P->N;
@@ -344,11 +367,11 @@ namespace GeometryProcessing
 				{
 					h->pair = __halfedgeTable.coeffRef(j, i);
 				}
-			}
+			}*/
 			//post process to find boundary vertices
 
 			//align the first half edge at boundary
-			for (auto v : vertices)
+			/*for (auto v : vertices)
 			{
 				auto h = v->hf_begin;
 				do
@@ -469,6 +492,7 @@ namespace GeometryProcessing
 				if (v->hf_begin->pair->isBoundary()) outerVertices.push_back(v); else innerVertices.push_back(v);
 			}
 			delete(__orientation);
+			*/
 		}
 		private:
 			void halfEdgeAdd(face *f)

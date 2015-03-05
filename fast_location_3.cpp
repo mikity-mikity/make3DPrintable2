@@ -15,30 +15,6 @@
 #include<algorithm>	
 #include<Eigen/Dense>
 #include"GeometryProcessing.h"
-struct col_int
-{
-	CGAL::Color col;
-	int num;
-	col_int()
-	{
-		col = CGAL::BLACK;
-		num = 0;
-	}
-	col_int(CGAL::Color _col, int _num)
-	{
-		col = _col;
-		num = _num;
-	}
-	
-	
-};
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Triangulation_vertex_base_with_info_3<col_int, K> Vb;
-typedef CGAL::Triangulation_data_structure_3<Vb>                    Tds;
-typedef CGAL::Delaunay_triangulation_3<K, Tds>                      Delaunay;
-//typedef CGAL::Delaunay_triangulation_3<K,CGAL::Fast_location> Delaunay;
-typedef Delaunay::Point Point;
-typedef CGAL::Vector_3<K> Vector;
 typedef std::vector<Point> branch;
 typedef struct
 {
@@ -61,7 +37,7 @@ typedef Delaunay::Vertex_handle Vertex_handle;
 typedef Delaunay::Locate_type    Locate_type;
 double PI=0.0;
 
-void computeGradient(Eigen::Vector3d &grad,vertex* v, int index, MeshStructure* MS, Eigen::VectorXd x, Eigen::Vector3d* normalPerFaces)
+void computeGradient(Eigen::Vector3d &grad,vertex* v, int index, MeshStructure* MS, Eigen::VectorXd x, Vector* normalPerFaces)
 {
 	grad(0)=0;
 	grad(1)=0;
@@ -82,7 +58,7 @@ void computeGradient(Eigen::Vector3d &grad,vertex* v, int index, MeshStructure* 
         grad(2) += 0.01*(2 * cz - 4 * dot * N.z() + norm * 2 * dot * N.z());
     }
 }
-void computeHessian(Eigen::Matrix3d &hess,vertex* v, int index,MeshStructure* MS, Eigen::VectorXd x, Vector3d* normalPerFaces)
+void computeHessian(Eigen::Matrix3d &hess,vertex* v, int index,MeshStructure* MS, Eigen::VectorXd x, Vector* normalPerFaces)
 {
 	hess(0,0)=0;
 	hess(0,1)=0;
@@ -131,32 +107,32 @@ boost::tuple<double,GeometryProcessing::MeshStructure*,std::map<vertex*,boost::t
     __int64 numvar = MS->vertices.size()* 3;
 	
     Eigen::VectorXd x = Eigen::MatrixXd::Zero(numvar, 1);
-    vector<Point3d> nodes = myMesh->Vertices;
-    Eigen::Vector3d *normalPerFaces = new Eigen::Vector3d[MS->nFaces()];
+    vector<Point> nodes = myMesh->Vertices;
+    Vector *normalPerFaces = new Vector[MS->nFaces()];
     //initial guess
     for (auto v : MS->vertices)
     {
 		std::vector<vertex*>::iterator iter = std::find(MS->vertices.begin(), MS->vertices.end(), v);
 		__int64 index = std::distance(MS->vertices.begin(), iter);
 		
-        Eigen::Vector3d N=Eigen::Vector3d(0,0,0);
+        Vector N(0,0,0);
         for (auto e : v->onering)
         {
             //compute normal
             auto P = nodes[e->P->N];
             auto Q = nodes[e->next->P->N];
             auto R = nodes[e->next->next->P->N];
-            auto b = Eigen::Vector3d(P.X - Q.X,P.Y-Q.Y,P.Z-Q.Z);
-            auto c = Eigen::Vector3d(R.X - Q.X,R.Y-Q.Y,R.Z-Q.Z);
-            auto n = b.cross(c);
-			n.normalize();
+            auto b = P-Q;
+            auto c = R-Q;
+            auto n = CGAL::cross_product(b,c);
+			n = n / std::sqrt(n.squared_length());
             normalPerFaces[e->owner->N] = n;
-            N += n;
+			N = N + n;
         }
-        N.normalize();
-        x(index * 3 + 0) = N(0);
-        x(index * 3 + 1) = N(1);
-        x(index * 3 + 2) = N(2);
+		N = N / std::sqrt(N.squared_length());
+        x(index * 3 + 0) = N.x();
+        x(index * 3 + 1) = N.y();
+        x(index * 3 + 2) = N.z();
     }
 	double tol=0.00000001;
 	int index=0;
@@ -182,7 +158,7 @@ boost::tuple<double,GeometryProcessing::MeshStructure*,std::map<vertex*,boost::t
 	for(auto itr=MS->vertices.begin();itr!=MS->vertices.end();itr++,index++)
 	{
 		auto v=*itr;	
-		Eigen::Vector3d P(nodes[v->N].X,nodes[v->N].Y,nodes[v->N].Z);
+		Eigen::Vector3d P(nodes[v->N].x(), nodes[v->N].y(), nodes[v->N].z());
         Eigen::Vector3d N(x(index * 3 + 0),x(index * 3 + 1),x(index * 3 + 2));
         output.insert(std::pair<vertex*,boost::tuple<Eigen::Vector3d,Eigen::Vector3d>>(v,boost::make_tuple(P,N)));
 	}
@@ -250,7 +226,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 			sscanf(words[1].data(),"%lf",&x);
 			sscanf(words[2].data(),"%lf",&y);
 			sscanf(words[3].data(),"%lf",&z);
-			_mesh->Vertices.push_back(Point3d(x,y,z));
+			_mesh->Vertices.push_back(Point(x,y,z));
 		}
 		if(prefix=="F"){
 			int A,B,C;
@@ -750,8 +726,8 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 {	
 	__int64 numInterior=0;
 	__int64 next=0;
-	double tt[10] = { 0.485,0.465,0.45,0.435,0.405,-0.405,-0.435,-0.45,-0.465,-0.485 };
-	double uv_ser[12] = { 0.015, 0.05, 0.1, 0.2, 0.32,0.44,0.56, 0.68, 0.8, 0.9, 0.95, 0.985 };
+	double tt[10] = { 0.48,0.465,0.45,0.425,0.405,-0.405,-0.425,-0.45,-0.465,-0.48};
+	double uv_ser[12] = { 0.01, 0.06, 0.12, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.88, 0.94, 0.99 };
 	for (auto tMS : mesh_infos)
 	{
 		double t;
@@ -1026,14 +1002,6 @@ int main(int argc, char *argv[])
 
 
 	//File write	
-	string filename1=NAME+".out";    //vertices
-	string filename2=NAME+"_S.out";  //indices of coner viertices of triangles
-	string filename3=NAME+"_F.out";  //tets
-	//string filename4=NAME+"_D.out";  //interior points
-	ofstream ofs(filename1);
-	ofstream ofs2(filename2);
-	ofstream ofs3(filename3);
-	//ofstream ofs4(filename4);	
 
 	std::vector<Rad_branch> data;
 	std::vector<Thick_mesh> mData;
@@ -1076,8 +1044,8 @@ int main(int argc, char *argv[])
 	exterior.clear();
 	std::cout<<"T.number_of_vertices:"<<T.number_of_vertices()<<endl;
 	std::cout<<"number_of_finite_cells:"<<T.number_of_finite_cells()<<endl;
-	std::map<Delaunay::Cell_handle,__int64> index;
-	std::cout<<"create index"<<endl;
+	std::map<Delaunay::Cell_handle, __int64> index;
+	std::cout << "create index" << endl;
 	asign_index_to_cells(index,T);
 	std::cout<<"start cell search"<<endl;
 
@@ -1240,11 +1208,8 @@ int main(int argc, char *argv[])
 	N=0;
 	double D=0.4;
 	__int64 count=0;
-	for(Delaunay::Finite_cells_iterator itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++,N++)
+	for (Delaunay::Finite_cells_iterator itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++, N++)
 	{
-		//bool_list[N]=true;
-		//if(cells[N]<1)bool_list[N]=false;
-
 		if (itr->vertex(0)->info().col == CGAL::RED&&itr->vertex(1)->info().col == CGAL::RED&&itr->vertex(2)->info().col == CGAL::RED&&itr->vertex(3)->info().col == CGAL::RED)
 		{
 			bool_list[N] = false;
@@ -1255,41 +1220,8 @@ int main(int argc, char *argv[])
 		}
 		if(cells[N]>=1)bool_list[N]=true;
 	}
-	
-	std::cout<<"start refine"<<endl;
-	std::cout << "push and pop" << endl;
-	__int64 TT = 0;
-	for (int _i = 0; _i < 10; _i++)
-	{
-		int num = 0;
-		N = 0;
-		for (Delaunay::Finite_cells_iterator itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++, N++)
-		{
-			if (bool_list[N] == false)
-			{
-				int count = 0;
-				for (int i = 0; i<4; i++)
-				{
-					Delaunay::Cell_handle _neighbor = itr->neighbor(i);
-					std::map<Delaunay::Cell_handle, __int64>::iterator it_N = index.find(_neighbor);
-					if (it_N != index.end())
-					{
-						if (bool_list[it_N->second])count++;
-					}
-				}
-				if (count>2){
-					bool_list[N] = true;
-					//everything++;
-					num++;
-				}
-			}
-
-		}
-
-		TT++;
-		std::cout << "refine:" << TT << ", corrected:" << num << endl;
-		if (num == 0)break;
-	}
+	__int64 NN;
+	/*std::cout<<"start refine"<<endl;
 	std::cout << "erase bubbles" << endl;
 	std::map<Cell_handle,__int64> _cells; 
 	std::list<Cell_handle> cells1; 
@@ -1306,7 +1238,114 @@ int main(int argc, char *argv[])
 			N++;
 		}
 	}
-	__int64 NN=totalCount/20;
+	NN=totalCount/20;
+	if(NN<1)NN=1;
+	cells2.push_back(_cells.begin()->first);
+	_cells.erase(_cells.begin()->first);
+	N=0;
+	std::cout<<"totalCount:"<<totalCount<<endl;
+	while(!_cells.empty())
+	{
+		std::list<Cell_handle> cells3; 
+		while(!cells2.empty())
+		{
+			if (!_cells.empty())
+			{
+				for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
+				{
+					for(int i=0;i<4;i++)
+					{
+						Cell_handle nei = (*itr)->neighbor(i);
+						std::map<Cell_handle, __int64>::iterator it = _cells.find(nei);
+						if (it != _cells.end())
+						{
+							cells1.push_back(nei);
+							_cells.erase(nei);
+							N++;
+							if((N/NN)*NN==N)std::cout<<"*";
+						}
+					}
+				}
+			}
+			for(auto itr=cells2.begin();itr!=cells2.end();itr++)
+			{
+				cells3.push_back(*itr);
+			}
+			cells2.clear();
+			if(!cells1.empty()){
+				for(auto itr=cells1.begin();itr!=cells1.end();itr++)
+				{
+					cells2.push_back(*itr);
+				}
+				cells1.clear();
+			}
+		}
+		if(!cells2.empty())
+		{
+			for(auto itr=cells2.begin();itr!=cells2.end();itr++)
+			{
+				cells3.push_back(*itr);
+			}
+		}
+		if (!cells3.empty())
+			cell_group.push_back(cells3);
+		if(!_cells.empty())
+		{
+			cells2.push_back(_cells.begin()->first);
+			_cells.erase(_cells.begin()->first);
+		}
+	}
+	std::cout<<endl;
+	std::cout<<cell_group.size()<<"groups found"<<endl;
+	count=0;
+	parallel_for_each(cell_group.begin(), cell_group.end(), [&index,&bool_list,&count](std::list<Cell_handle> itr)
+	{
+		bool flag=false;
+		for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
+		{
+			for(int i=0;i<4;i++)
+			{
+				if(index.find((*itr2)->neighbor(i))==index.end())
+				{
+					flag=true;
+				}
+			}
+			if(flag)break;
+		}
+		if(!flag)
+		{
+			for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
+			{
+				bool_list[index.find(*itr2)->second]=true;
+				//everything++;
+				count++;
+			}
+		}
+	});
+	_cells.clear();
+	cells1.clear();
+	cells2.clear();
+
+	for (auto itr = cell_group.begin(); itr != cell_group.end();itr++)
+	{
+		itr->clear();
+	}
+	cell_group.clear();
+
+	std::cout<<count<<"cells recovered"<<endl;
+	//in turn, positive cells are investigated ans small groups are eliminated.
+	totalCount=0;
+	N=0;
+	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)
+	{
+		if(bool_list[index.find(itr)->second]==true)
+		{
+			_cells.insert(std::make_pair(itr,N));
+			totalCount++;
+			N++;
+		}
+	}
+	NN=totalCount/20;
 	if(NN<1)NN=1;
 	cells2.push_back(_cells.begin()->first);
 	_cells.erase(_cells.begin()->first);
@@ -1369,26 +1408,17 @@ int main(int argc, char *argv[])
 	std::cout<<endl;
 	std::cout<<cell_group.size()<<"groups found"<<endl;
 	count=0;
-	parallel_for_each(cell_group.begin(), cell_group.end(), [&index,&bool_list,&count](std::list<Cell_handle> itr)
-	//for(auto itr=cell_group.begin();itr!=cell_group.end();itr++)
+	int survived=0;
+	parallel_for_each(cell_group.begin(), cell_group.end(), [&index,&bool_list,&count,&survived](std::list<Cell_handle> itr)
 	{
 		bool flag=false;
-		for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
-		{
-			for(int i=0;i<4;i++)
-			{
-				if(index.find((*itr2)->neighbor(i))==index.end())
-				{
-					flag=true;
-				}
-			}
-			if(flag)break;
-		}
-		if(!flag)
+		if(itr.size()<20)flag=true;
+		if(!flag)survived++;
+		if(flag)
 		{
 			for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
 			{
-				bool_list[index.find(*itr2)->second]=true;
+				bool_list[index.find(*itr2)->second]=false;
 				//everything++;
 				count++;
 			}
@@ -1403,179 +1433,8 @@ int main(int argc, char *argv[])
 	}
 	cell_group.clear();
 
-	std::cout<<count<<"cells recovered"<<endl;
-	
-	/*std::cout<<"erase irregular incident vertices"<<endl;
-	for (int _i = 0; _i < 50;_i++)
-	{
-		N=0;
-		NN=T.number_of_vertices()/20;
-		if(NN<1)NN=1;
-		totalCount=0;
-		auto itr = T.vertices_begin();
-		for(auto itr=T.vertices_begin();itr!=T.vertices_end();itr++,N++)
-		{
-			std::list<Cell_handle> _cells; 
-			std::list<Cell_handle> cells; 
-			std::list<Cell_handle> cells2; 
-			std::list<Cell_handle> cells3; 
-			T.incident_cells(itr,std::back_inserter(_cells)); 
-			if (_cells.empty()){
-				continue;
-			}
-			for(auto _itr=_cells.begin();_itr!=_cells.end();_itr++)
-			{
-				map<Cell_handle,__int64>::iterator itr2=index.find(*_itr);
-				if(itr2!=index.end())
-				{
-					__int64 N=itr2->second;
-					if(bool_list[N])
-					{
-						cells.push_back(*_itr);
-					}
-				}
-			}
-			if (cells.empty()){
-				continue;
-			}
-			if (cells.size() == 1){
-				continue;
-			}
-			cells2.push_back(*cells.begin());
-			cells.pop_front();
-			//find cells[0] neigbors.
-			while(true)
-			{
-				int count=0;
-				for(auto _itr=cells.begin();_itr!=cells.end();_itr++)
-				{
-					for(int i=0;i<4;i++)
-					{
-						Cell_handle nei=(*_itr)->neighbor(i);
-						if(std::find(cells2.begin(),cells2.end(),nei)!=cells2.end())
-						{
-							cells3.push_back(*_itr);
-							count++;
-							break;
-						}
-					}
-				}
-				for(auto itr=cells3.begin();itr!=cells3.end();itr++)
-				{
-					cells.erase(std::find(cells.begin(),cells.end(),*itr));
-					cells2.push_back(*itr);
-				}
-				cells3.clear();
-				if(count==0)break;
-			}
-			//cell should not contain cells.
-			if(cells.size()!=0){
-				std::list<Cell_handle> toErase;
-				if(cells.size()<cells2.size()) toErase=cells; else toErase=cells2;
-				for(auto itr=toErase.begin();itr!=toErase.end();itr++)
-				{
-					__int64 N=index.find(*itr)->second;
-					bool_list[N]=false;
-					//everything++;
-					totalCount++;
-				}
-			}
-			if(((int)N/NN)*NN==N)std::cout<<"*";
-		}
-		std::cout<<endl;
-		std::cout<<totalCount<<"cells removed!"<<endl;
-		if(totalCount==0)break;
-	}
-	std::cout<<"erase irregular incident edges"<<endl;
-	for (int _i = 0; _i < 50; _i++)
-	{
-		N=0;
-		NN=T.number_of_edges()/20;
-		if(NN==0)NN=1;
-		totalCount=0;
-		for(auto itr=T.finite_edges_begin();itr!=T.finite_edges_end();itr++,N++)
-		{
-			std::list<Cell_handle> _cells; 
-			std::list<Cell_handle> cells; 
-			std::list<Cell_handle> cells2; 
-			std::list<Cell_handle> cells3; 
-			Delaunay::Cell_circulator circle=T.incident_cells(*itr); 
-			Delaunay::Cell_circulator begin=circle;
-			std::map<Cell_handle,__int64>::iterator it=index.find(circle);
-			if(it==index.end())continue;
-			bool flag=bool_list[it->second];
-			int counter=0;
-			std::vector<Delaunay::Cell_circulator> start;
-			while(true)
-			{
-				circle++;
-				it=index.find(circle);
-				if(it==index.end())
-				{
-					if(flag==true)
-					{
-						flag=false;
-						counter++;
-					}
-				}else if(bool_list[it->second]!=flag){
-					flag=bool_list[it->second];
-					if(flag)
-					{
-						start.push_back(circle);
-					}
-					counter++;
-				}
-				if(circle==begin)break;
-			}
-			if(counter==4)
-			{
-				std::vector<__int64> len;
-				for(int i=0;i<2;i++)
-				{
-					Delaunay::Cell_circulator s=start[i];
-				    __int64 L=0;
-					while(true)
-					{
-						circle++;
-						L++;
-						it=index.find(circle);
-						if(it==index.end())
-						{
-							break;
-						}else if(bool_list[it->second]==false){
-							break;
-						}
-					}
-					len.push_back(L);
-				}
-				Delaunay::Cell_circulator toErase;
-				if(len[0]<len[1]){
-					toErase=start[0];
-				}else
-				{
-					toErase=start[1];
-				}
-				while(true)
-				{
-					it=index.find(toErase);
-					if(it==index.end())
-					{
-						break;
-					}else if(bool_list[it->second]==false){
-						break;
-					}
-					bool_list[it->second]=false;
-					toErase++;
-					totalCount++;
-				}
-			}
-		}
-		std::cout<<endl;
-		std::cout<<totalCount<<"cells removed!"<<endl;
-		if(totalCount==0)break;
-	}
-	
-	*/
+	std::cout<<count<<" cells eliminated"<<endl;
+	std::cout<<survived<<" groups survived"<<endl;
 	std::cout << "look up isolated tets." << endl;
 	N = 0;
 	__int64 num = 0;
@@ -1607,8 +1466,21 @@ int main(int argc, char *argv[])
 	}
 
 	std::cout << "found "<<num<<" isolated tets. They were eliminated." << endl;
-
-	
+	*/
+	//std::cout<<"press enter to continue"<<endl;
+	//std::cin.get();
+	std::cout << "start writing bool_list" << endl;
+	string filename2 = NAME + ".bool";    //vertices
+	ofstream ofs2(filename2);
+	N = T.number_of_finite_cells();
+	bool* ptr = &bool_list[0];
+	for(int i=0;i<N;i++)
+	{
+		ofs2 << *ptr << endl;
+		ptr++;
+	}
+	ofs2.close();
+	std::cout << "finished writing bool_list"<<endl;
 	N=0;
 	std::vector<Delaunay::Facet> facet_list;
 	std::cout<<"count up boundary facets"<<endl;
@@ -1616,10 +1488,15 @@ int main(int argc, char *argv[])
 	NN = index.size() / 20;
 	if (NN<1)NN = 1;
 	critical_section cs;
-	parallel_for_each(index.begin(), index.end(), [&T, &index, &bool_list, &NN, &facet_list,&cs](std::pair<Delaunay::Cell_handle, __int64> cell)
+	string filename4 = NAME + ".bound";    //vertices
+	ofstream ofs4(filename4);
+	//for_each(index.begin(), index.end(), [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](std::pair<Delaunay::Cell_handle, __int64> cell)
+	N = 0;
+	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++,N++)/* [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](Delaunay::Cell_handle cell)*/
 	{
-		auto N = cell.second;
-		auto itr = cell.first;
+		//auto cell = *itr;
+		//auto N = cell.second;
+		//auto itr = cell.first;
 		if(bool_list[N])
 		{
 			for(int i=0;i<4;i++)
@@ -1629,23 +1506,26 @@ int main(int argc, char *argv[])
 				std::map<Delaunay::Cell_handle,__int64>::iterator itr_c=index.find(nei);
 				if(itr_c==index.end())
 				{
-					cs.lock();
+					//cs.lock();
 					facet_list.push_back(Delaunay::Facet(itr,i));
-					cs.unlock();
+					ofs4 << N << "-" << i << endl;
+					//cs.unlock();
 				}else
 				{
 					__int64 N2=itr_c->second;
 					if (!bool_list[N2])
 					{
-						cs.lock();
+						//cs.lock();
 						facet_list.push_back(Delaunay::Facet(itr, i));
-						cs.unlock();
+						ofs4 << N << "-" << i << endl;
+						//cs.unlock();
 					}
 				}
 			}
 		}
 		if(((int)N/NN)*NN==N)std::cout<<"*";
-	});
+	}//);
+	ofs4.close();
 	index.clear();
 
 	std::cout<<endl;
@@ -1653,17 +1533,15 @@ int main(int argc, char *argv[])
 	delete [] bool_list;
 	std::cout << "number of boundary facets:" << facet_list.size() << endl;
 	std::cout << "construct mesh" << endl;
-	parallel_for_each(T.finite_vertices_begin(), T.finite_vertices_end(), [](Delaunay::Vertex v)
+	for_each(T.finite_vertices_begin(), T.finite_vertices_end(), [](Delaunay::Vertex v)
 	{
 		v.info().num = -1;
 	});
-
-	parallel_for_each(T.finite_vertices_begin(), T.finite_vertices_end(), [](Delaunay::Vertex v)
-	{
-		if (v.info().num != -1)std::cout << "error!";
-	});
 	Mesh mesh;
 	int vertexCount = 0;
+	std::cout << "start writing facet_list" << endl;
+	string filename3 = NAME + ".facets";    //vertices
+	ofstream ofs3(filename3);
 	for (auto F : facet_list)
 	{
 		Delaunay::Cell_handle cell = F.first;
@@ -1707,7 +1585,7 @@ int main(int argc, char *argv[])
 			if (v[i]->info().num == -1)
 			{
 				v[i]->info().num = vertexCount;
-				mesh.Vertices.push_back(Point3d(v[i]->point().x(), v[i]->point().y(), v[i]->point().z()));
+				mesh.Vertices.push_back(v[i]->point());
 				vertexCount++;
 			}
 		}
@@ -1721,61 +1599,54 @@ int main(int argc, char *argv[])
 		if (normal*v14 >0)flag = false; //if false, flip
 		if (flag)
 		{
-			mesh.Faces.push_back(MeshFace(v[0]->info().num, v[1]->info().num, v[2]->info().num,normal.x(),normal.y(),normal.z()));
+			mesh.Faces.push_back(MeshFace(v[0]->info().num, v[1]->info().num, v[2]->info().num,normal));
 		}
 		else
 		{
-			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num, -normal.x(), -normal.y(), -normal.z()));
+			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num, -normal));
 		}
-
 	}
+	for (auto f : mesh.Faces)
+	{
+		ofs3 << f.A << "," << f.B << "," << f.C << endl;
+	}
+	ofs3.close();
+	std::cout << "finished writing facets." << endl;
 	std::cout << "release triangulation." << endl;
 	T.clear();
-	MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh);
+	//MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh);
+	//delete MS;
+	string filename1 = NAME + ".stl";    //vertices
+	ofstream ofs(filename1);
 	std::cout << "start writing file" << "[" << filename1 << "]" << endl;
-	/*
-	N=0;
-	NN=T.number_of_finite_cells()/20;
-	if(NN==0)NN=1;
-	std::cout<<endl;
-	N=0;
-	num=0;
-	NN=facet_list.size()/20;
-	if(NN==0)NN=1;
-	
-	std::map<Delaunay::Vertex_handle,__int64> vIndex;
-
-	for(auto itr=facet_list.begin();itr!=facet_list.end();itr++,num++)
+	//export stl
+	ofs << "solid " << NAME << endl;
+	N = 0;
+	NN = mesh.Faces.size() / 20;
+	if (NN == 0)NN = 1;
+	for (auto face : mesh.Faces)
 	{
-		for(int i=0;i<4;i++)
-		{
-			if(i!=itr->second)
-			{
-				Delaunay::Vertex_handle handle=itr->first->vertex(i);				
-				std::map<Delaunay::Vertex_handle,__int64>::iterator pair=vIndex.find(handle);
-				if(pair==vIndex.end())
-				{
-					Delaunay::Point P=handle->point();
-					double x=P.x(),y=P.y(),z=P.z();
-					ofs<<x<<" , "<<y<<" , "<<z<<endl;
-					vIndex.insert(std::make_pair(handle,N));
-					ofs2<<N<<" ";
-					N++;
-				}else
-				{
-					ofs2<<pair->second<<" ";
-				}
-			}
-		}
-		ofs2<<endl;
-		if(((int)num/NN)*NN==num)std::cout<<"*";
+		int A = face.A;
+		int B = face.B;
+		int C = face.C;
+		auto PA = mesh.Vertices[A];
+		auto PB = mesh.Vertices[B];
+		auto PC = mesh.Vertices[C];
+		ofs << "facet normal " << face.N.x() << " " << face.N.y() << " " << face.N.z() << endl;
+		ofs << "outer loop" << endl;
+		ofs << "vertex " << PA.x() << " " << PA.y() << " " << PA.z() << endl;
+		ofs << "vertex " << PB.x() << " " << PB.y() << " " << PB.z() << endl;
+		ofs << "vertex " << PC.x() << " " << PC.y() << " " << PC.z() << endl;
+		ofs << "endloop" << endl;
+		ofs << "endfacet" << endl;
+		N++;
+		if (((int)N / NN)*NN == N)std::cout << "*";
 	}
-	*/
+	ofs << "endsolid " << NAME << endl;
 	std::cout<<endl;
 	ofs.close();
-	ofs2.close();
-	delete MS;
-
+	//ofs2.close();
+	
 	//ofs3.close();
 	
 	//ofs4.close();
@@ -1789,3 +1660,4 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+

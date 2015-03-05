@@ -1,3 +1,33 @@
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Random.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
+#include <CGAL/Surface_mesh_default_triangulation_3.h>
+struct col_int
+{
+	CGAL::Color col;
+	int num;
+	col_int()
+	{
+		col = CGAL::BLACK;
+		num = 0;
+	}
+	col_int(CGAL::Color _col, int _num)
+	{
+		col = _col;
+		num = _num;
+	}
+
+
+};
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Triangulation_vertex_base_with_info_3<col_int, K> Vb;
+typedef CGAL::Triangulation_data_structure_3<Vb>                    Tds;
+typedef CGAL::Delaunay_triangulation_3<K, Tds>                      Delaunay;
+//typedef CGAL::Delaunay_triangulation_3<K,CGAL::Fast_location> Delaunay;
+typedef Delaunay::Point Point;
+typedef CGAL::Vector_3<K> Vector;
+
 #include <vector>
 #include<Eigen/Dense>
 #include<Eigen/Sparse>
@@ -13,48 +43,64 @@ namespace GeometryProcessing
 	{
 	public:
 		int A,B,C;
-		double nx, ny, nz;
+		Vector N;
 		MeshFace(int _A, int _B, int _C)
 		{
 			A = _A;
 			B = _B;
 			C = _C;
-			nx = 0;
-			ny = 0;
-			nz = 0;
+			N = Vector(0, 0, 0);
 		}
-		MeshFace(int _A, int _B, int _C,double _nx,double _ny,double _nz)
+		MeshFace(int _A, int _B, int _C,Vector _N)
 		{
 			A = _A;
 			B = _B;
 			C = _C;
-			nx = _nx;
-			ny = _ny;
-			nz = _nz;
+			N = _N;
 		}
 	};
-	struct Point3d{
+/*	struct Point3d{
 	public:
-		double X,Y,Z;
+		long double X,Y,Z;
 		Point3d()
 		{
 			X=0;
 			Y=0;
 			Z=0;
 		}
-		Point3d(double _x,double _y,double _z)
+		Point3d(long double _x,long double _y,long double _z)
 		{
 			X=_x;
 			Y=_y;
 			Z=_z;
 		}
-	};
-
+		Point3d cross(Point3d f)
+		{
+			Point3d ret(Y*f.Z - Z*f.Y, Z*f.X - X*f.Z, X*f.Y - Y*f.X);
+			return ret;
+		}
+		long double dot(Point3d f)
+		{
+			return X*f.X + Y*f.Y + Z*f.Z;
+		}
+		long double norm()
+		{
+			return std::sqrt(X*X + Y*Y + Z*Z);
+		}
+		Point3d operator-(Point3d d)
+		{
+			return Point3d(X - d.X, Y - d.Y, Z - d.Z);
+		}
+		Point3d operator/(long double f)
+		{
+			return Point3d(X / f, Y / f, Z / f);
+		}
+	};*/
 	struct Mesh
 	{
 	public:
 		vector<MeshFace> Faces;
-		vector<Point3d> Vertices;
+		vector<Point> Vertices;
 		Mesh()
 		{
 			Faces.clear();
@@ -295,12 +341,18 @@ namespace GeometryProcessing
 				auto _v = new vertex(i);
 				vertices.push_back(_v);
 			}
-			int i = 0;
 			vector<halfedge*>* vectorPool = new vector<halfedge*>[val->Vertices.size()];
 			int cc = 0;
-			for (auto f : val->Faces)
+			int tt = 0;
+			for (int i = 0; i < _nFaces;i++)
 			{
+				auto f = val->Faces[i];
 				auto _f = new face(i,f.A,f.B,f.C);
+				if ((f.A<f.C&&f.A!=i*3&&tt<10)||(f.A>f.C&&f.C!=i*3&&tt<10)||i==498811||i==664269||((f.A==2&&f.B==0)||(f.A==2&&f.C==0)||(f.B==2||f.C==0)||(f.A==0&&f.B==2)||(f.A==0&&f.C==2)||(f.B==0&&f.C==2)))
+				{
+					std::cout << "F(" << i << "):" << f.A << "," << f.B << "," << f.C << endl;
+					tt++;
+				}
 				faces.push_back(_f);
 				halfedge* eA = new halfedge(vertices[f.A]);// &halfedgePool[i * 3 + 0];
 				halfedge* eB = new halfedge(vertices[f.B]);
@@ -321,11 +373,210 @@ namespace GeometryProcessing
 				vectorPool[f.A].push_back(eA);
 				vectorPool[f.B].push_back(eB);
 				vectorPool[f.C].push_back(eC);
-				i++;
-				if ((i / 10000) * 10000 == i)std::cout << i << endl;
+				//if ((i / 10000) * 10000 == i)std::cout << i << endl;
 			}
 			//circulate vertices and count up errors
-			int count = 0;
+			//find pairs
+			int count1 = 0;
+			int count2 = 0;
+			int CCount1 = 0;
+			int CCount2 = 0;
+			double PI2 = boost::math::constants::pi<double>() * 2.;
+			double PI = boost::math::constants::pi<double>();
+			vector<int> errors;
+			for (int i = 0; i < val->Vertices.size(); i++)
+			{
+				auto pool = vectorPool[i];
+				vertex* v = vertices[i];
+				bool flag = false;
+				for (auto p : pool) //p is a halfedge
+				{
+					//std::cout << "A" << endl;
+					vertex* w=p->next->P;
+					if (i != p->P->N){
+						std::cout << "i!=p->P" << endl;
+						std::cout << "continue" << endl;
+						std::cin.get();
+					}
+					vector<std::pair<halfedge*, bool>> candidates;
+					for (auto t : vectorPool[w->N])
+					{
+						if (t->next->P->N == i)
+							candidates.push_back(std::make_pair(t,false));
+					}
+					for (auto t : pool)
+					{
+						if (t != p)
+						{
+							if (t->P->N == i)
+							{
+								if (t->next->P==w)
+									candidates.push_back(std::make_pair(t, true));
+							}
+						}
+					}
+					if (candidates.size()>1){
+						//std::cout << "candidates.size():" << candidates.size() << endl;
+						//std::cout << candidates[0].first->owner->N << ":" << candidates[0].first->owner->corner[0] << "," << candidates[0].first->owner->corner[1] << "," << candidates[0].first->owner->corner[2] << endl;
+						count2++;
+						face* FA = p->owner;
+						vector<std::pair<halfedge*,bool>> candidates2;
+						for (auto itr = candidates.begin(); itr != candidates.end(); itr++)
+						{
+							auto hf = itr->first;
+							face* FB = hf->owner;
+							Vector NA = val->Faces[FA->N].N;
+							Vector NB = val->Faces[FB->N].N;
+							Vector a=val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
+							Vector d=val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+							if (itr->second){
+								d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
+							}
+							//a = a / a.norm();
+							//d = d / d.norm();
+							double valB = CGAL::cross_product(a, NA)*CGAL::cross_product(d, NB);
+							if (valB > 0){
+								candidates2.push_back(*itr);
+							}
+							//std::cout << "valB=" << valB<<","<<itr->second << endl;
+						}
+
+						//std::cout << "Press enter to continue" << endl;
+						//std::cin.get();
+						if (candidates2.size() == 1)
+						{
+							p->pair = candidates2[0].first;
+							if (candidates2[0].second)
+							{
+								CCount2++;
+							}
+							else CCount1++;
+						}
+						else if (candidates2.size() == 0)
+						{
+							std::cout << "this is not good." << endl;
+							for (auto itr = candidates.begin(); itr != candidates.end(); itr++)
+							{
+								auto hf = itr->first;
+								face* FB = hf->owner;
+								auto NA = val->Faces[FA->N].N;
+								auto NB = val->Faces[FB->N].N;
+								Vector a = val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
+								Vector d = val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+								if (itr->second){
+									d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
+								}
+								//a = a / std::sqrt(a.squared_length);
+								//d = d / std::sqrt(d.squared_length);
+								double valB = CGAL::cross_product(a,NA)*CGAL::cross_product(d,NB);
+								std::cout << "valB=" << valB << endl;
+							}
+							std::cout << "Press enter to continue" << endl;
+							std::cin.get();
+						}else
+						{
+							//std::cout << "cadidates2.size():" << candidates2.size() << endl;
+							//calculate dihedral angle
+							vector<double> angles;
+							for (auto itr = candidates2.begin(); itr != candidates2.end(); itr++)
+							{
+								auto hf = itr->first;
+								face* FB = hf->owner;
+								Vector NA=val->Faces[FA->N].N;
+								Vector NB=val->Faces[FB->N].N;
+								Vector a = val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
+							    Vector d = val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+								if (itr->second){
+									d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
+								}
+								//a = a / a.norm();
+								//d = d / d.norm();
+
+								double val = CGAL::cross_product(a, NA)*CGAL::cross_product(a, d);
+								bool leftorright = false;
+								if (val < 0)leftorright = true;  //if true, it is turning to the right...
+								//calculate angle
+								double cos = NA*NB;
+								double sin = std::sqrt(CGAL::cross_product(NA, NB).squared_length());
+								if (!leftorright)sin = -sin;
+								double theta1 = std::acos(cos);  //0-180
+								double theta2 = std::asin(sin);  //-90-90
+								double theta = 0;
+								if (theta2 > 0.0)theta = theta2; else theta = PI2 - theta1;  //0-360
+
+								if (theta > PI)theta = theta - PI2;
+								angles.push_back(-theta);
+								//if theta is min choose it!
+							}
+							//choose index of min theta
+							double max = -1000;
+							int maxIndex = -1000;
+							for (int k = 0; k < angles.size(); k++)
+							{
+								if (angles[k]>max){
+									max = angles[k];
+									maxIndex = k;
+								}
+							}
+							//std::cout << "F:"<<maxIndex<<"/"<<angles.size() << endl;
+							p->pair = candidates2[maxIndex].first;
+							if (candidates2[maxIndex].second)
+							{
+								CCount2++;
+							}
+							else CCount1++;
+						}
+					}
+					else
+					{
+						//std::cout << "candidates.size():" << candidates.size() << endl;
+						//std::cout << p->P->N << "->" << p->next->P->N<<"->"<<p->next->next->P->N << "->"<<p->next->next->next->P->N<<endl;
+						//std::cout << candidates[0].first->owner->N << ":" << candidates[0].first->owner->corner[0] << "," << candidates[0].first->owner->corner[1] << "," << candidates[0].first->owner->corner[2] << endl;
+						//std::cout << "Press enter to continue" << endl;
+						//std::cin.get();
+						p->pair = candidates[0].first;
+						count1++;
+						if (candidates[0].second)
+						{
+							CCount2++;
+						}
+						else CCount1++;
+					}
+				}
+			}
+			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
+			std::cout << "CCount1:" << count1 << "/" << "CCount2:" << count2 << endl;
+			count1 = 0;
+			count2 = 0;
+			for (auto hf : halfedges)
+			{
+				if (hf->pair->pair == hf)
+				{
+					count1++;
+				}
+				else
+				{
+					count2++;
+				}
+			}
+			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
+			std::cout << "Press enter to continue" << endl;
+			std::cin.get();
+			/*			for (int i = 0; i < val->Vertices.size(); i++)
+			{
+				vector<vector<halfedge*>> onestars;
+				auto pool = vectorPool[i];
+				vertex* v = vertices[i];
+				while (pool.size() != 0)
+				{
+					vector<halfedge*> onestar;
+					onestar.push_back(pool.back());
+					pool.pop_back();
+					onestars.push_back(onestar);
+				}
+			}*/
+/*			int count = 0;
+			vector<int> errors;
 			for(int i=0;i<val->Vertices.size();i++)
 			{
 				auto pool=vectorPool[i];
@@ -343,9 +594,18 @@ namespace GeometryProcessing
 					if (!set.insert(*it).second)
 						flag = false;//result.push_back(*it);
 				}
-				if (!flag)count++;
+				if (!flag){
+					count++;
+					errors.push_back(i);
+				}
 			}
 			std::cout << count << "/" << val->Vertices.size() << endl;
+			for (int i : errors)
+			{
+				auto pool = vectorPool[i];
+				auto v = vertices[i];
+				//fid pairs
+			}*/
 			//find pairs
 			/*for (auto h : halfedges)
 			{

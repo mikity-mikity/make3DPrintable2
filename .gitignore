@@ -60,6 +60,7 @@ dlldata.c
 *.svclog
 *.scc
 *.out
+*.tlog
 
 # Chutzpah Test files
 _Chutzpah*

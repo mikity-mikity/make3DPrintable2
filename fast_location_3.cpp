@@ -1588,11 +1588,11 @@ int main(int argc, char *argv[])
 		auto v23 = v[2]->point() - v[1]->point();
 		auto v14 = v[3]->point() - v[0]->point();
 		auto normal=CGAL::cross_product(v12, v23);
+		if (std::sqrt(normal.squared_length()) < 0.001)std::cout << "YA!" << std::sqrt(normal.squared_length()) << endl;
 		normal = normal / std::sqrt(normal.squared_length());
 		//judge orientation
 		bool flag = true;
 		if (normal*v14 >0)flag = false; //if false, flip
-		if (std::sqrt(normal.squared_length()) < 0.0000000001)std::cout << "YA!" << endl;
 		if (flag)
 		{
 			mesh.Faces.push_back(MeshFace(v[0]->info().num, v[1]->info().num, v[2]->info().num,normal));
@@ -1600,6 +1600,21 @@ int main(int argc, char *argv[])
 		else
 		{
 			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num, -normal));
+		}
+		__int64 T1 = 17425;
+		__int64 T2 = 17426;
+		int cc = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (v[i]->info().num == T1)cc++;
+			if (v[i]->info().num == T2)cc++;
+		}
+		if (cc == 2)
+		{
+			std::cout << "V1:" << v[0]->info().num << ":" << v[0]->point().x() << "," << v[0]->point().y() << "," << v[0]->point().z() << endl;
+			std::cout << "V2:" << v[1]->info().num << ":" << v[1]->point().x() << "," << v[1]->point().y() << "," << v[1]->point().z() << endl;
+			std::cout << "V3:" << v[2]->info().num << ":" << v[2]->point().x() << "," << v[2]->point().y() << "," << v[2]->point().z() << endl;
+			std::cout << "volume=" << CGAL::cross_product(v12, v23)*v14 << endl;
 		}
 	}
 	for (auto f : mesh.Faces)

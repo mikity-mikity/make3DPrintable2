@@ -352,11 +352,6 @@ namespace GeometryProcessing
 			{
 				auto f = val->Faces[i];
 				auto _f = new face(i,f.A,f.B,f.C);
-				if ((f.A<f.C&&f.A!=i*3&&tt<10)||(f.A>f.C&&f.C!=i*3&&tt<10)||i==498811||i==664269||((f.A==2&&f.B==0)||(f.A==2&&f.C==0)||(f.B==2||f.C==0)||(f.A==0&&f.B==2)||(f.A==0&&f.C==2)||(f.B==0&&f.C==2)))
-				{
-					std::cout << "F(" << i << "):" << f.A << "," << f.B << "," << f.C << endl;
-					tt++;
-				}
 				faces.push_back(_f);
 				halfedge* eA = new halfedge(vertices[f.A]);// &halfedgePool[i * 3 + 0];
 				halfedge* eB = new halfedge(vertices[f.B]);
@@ -455,7 +450,7 @@ namespace GeometryProcessing
 						{
 							std::cout << "find an error" << endl;
 							std::cout << "candidates.size():" << candidates.size() << endl;
-							std::cout << FA->N << ":" << FA->corner[0] << "," << FA->corner[1] << "," << FA->corner[2] << endl;
+							std::cout << FA->N << ":" << p->P->N << "," << p->next->P->N << endl;
 							for (auto itr = candidates.begin(); itr != candidates.end(); itr++)
 							{
 								auto hf = itr->first;
@@ -476,7 +471,7 @@ namespace GeometryProcessing
 							std::cin.get();
 						}else
 						{
-							std::cout << "candidates.size()"<<candidates.size()<<","<<"cadidates2.size():" << candidates2.size() << endl;
+							//std::cout << "candidates.size()"<<candidates.size()<<","<<"cadidates2.size():" << candidates2.size() << endl;
 							//calculate dihedral angle
 							vector<double> angles;
 							for (auto itr = candidates2.begin(); itr != candidates2.end(); itr++)

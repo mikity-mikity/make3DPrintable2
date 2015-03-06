@@ -337,8 +337,9 @@ void generate_eclipseTree(std::vector<Rad_branch> &data,std::vector<eclipses*> &
 }
 inline double max(std::vector<double> v)
 {
-    double maxVal = -1000000;       // ®”Å¬’l
-    for(int i = 0; i < (int)v.size(); ++i) {
+	double maxVal = DBL_MIN;
+	__int64 N = v.size();
+    for(__int64 i = 0; i < N; ++i) {
         if( v[i] > maxVal )
             maxVal = v[i];
     }
@@ -668,11 +669,11 @@ void generate_exterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &ec
 Delaunay triangulate(std::vector<std::pair<Point, col_int>> &exterior)
 {
 	Delaunay T;
-
+	__int64 s = exterior.size();
 	for (int i = 0; i<20; i++)
 	{
-		std::vector<std::pair<Point, col_int>>::iterator be = exterior.begin() + exterior.size()*i / 20;
-		std::vector<std::pair<Point, col_int>>::iterator en = exterior.begin() + exterior.size()*(i + 1) / 20;
+		std::vector<std::pair<Point, col_int>>::iterator be = exterior.begin() + s*i / 20;
+		std::vector<std::pair<Point, col_int>>::iterator en = exterior.begin() + s*(i + 1) / 20;
 		T.insert(be, en);
 		std::cout<<"*";
 	}
@@ -1470,7 +1471,7 @@ int main(int argc, char *argv[])
 	*/
 	//std::cout<<"press enter to continue"<<endl;
 	//std::cin.get();
-	std::cout << "start writing bool_list" << endl;
+	/*std::cout << "start writing bool_list" << endl;
 	string filename2 = NAME + ".bool";    //vertices
 	ofstream ofs2(filename2);
 	N = T.number_of_finite_cells();
@@ -1482,18 +1483,19 @@ int main(int argc, char *argv[])
 	}
 	ofs2.close();
 	std::cout << "finished writing bool_list"<<endl;
-	N=0;
+	*/
+		N=0;
 	std::vector<Delaunay::Facet> facet_list;
 	std::cout<<"count up boundary facets"<<endl;
 	
 	NN = T.number_of_finite_cells() / 20;
 	if (NN<1)NN = 1;
 	critical_section cs;
-	string filename4 = NAME + ".bound";    //vertices
-	ofstream ofs4(filename4);
+	//string filename4 = NAME + ".bound";    //vertices
+	//ofstream ofs4(filename4);
 	//for_each(index.begin(), index.end(), [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](std::pair<Delaunay::Cell_handle, __int64> cell)
 	N = 0;
-	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)/* [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](Delaunay::Cell_handle cell)*/
+	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)//, [&T, &bool_list, &NN, &facet_list, &cs](Delaunay::Cell itr)
 	{
 		__int64 N = itr->info();
 		if(bool_list[N])
@@ -1501,35 +1503,31 @@ int main(int argc, char *argv[])
 			for(int i=0;i<4;i++)
 			{
 				Delaunay::Cell_handle nei=itr->neighbor(i);
-				
 				if(nei->info()==-1)
 				{
-					//cs.lock();
+					cs.lock();
 					facet_list.push_back(Delaunay::Facet(itr,i));
-					ofs4 << N << "-" << i << endl;
-					//cs.unlock();
-				}else
+					//ofs4 << N << "-" << i << endl;
+					cs.unlock();
+				}else if (!bool_list[nei->info()])
 				{
-					if (!bool_list[nei->info()])
-					{
-						//cs.lock();
-						facet_list.push_back(Delaunay::Facet(itr, i));
-						ofs4 << N << "-" << i << endl;
-						//cs.unlock();
-					}
+					cs.lock();
+					facet_list.push_back(Delaunay::Facet(itr, i));
+					//ofs4 << N << "-" << i << endl;
+					cs.unlock();
 				}
 			}
 		}
 		if(((int)N/NN)*NN==N)std::cout<<"*";
 	}//);
-	ofs4.close();
+	//ofs4.close();
 
 	std::cout<<endl;
 	std::cout << "releasing bool_list" << endl;
 	delete [] bool_list;
 	std::cout << "number of boundary facets:" << facet_list.size() << endl;
 	std::cout << "construct mesh" << endl;
-	for_each(T.finite_vertices_begin(), T.finite_vertices_end(), [](Delaunay::Vertex v)
+	parallel_for_each(T.finite_vertices_begin(), T.finite_vertices_end(), [](Delaunay::Vertex v)
 	{
 		v.info().num = -1;
 	});
@@ -1585,6 +1583,7 @@ int main(int argc, char *argv[])
 				vertexCount++;
 			}
 		}
+		
 		auto v12 = v[1]->point() - v[0]->point();
 		auto v23 = v[2]->point() - v[1]->point();
 		auto v14 = v[3]->point() - v[0]->point();
@@ -1593,6 +1592,7 @@ int main(int argc, char *argv[])
 		//judge orientation
 		bool flag = true;
 		if (normal*v14 >0)flag = false; //if false, flip
+		if (std::sqrt(normal.squared_length()) < 0.0000000001)std::cout << "YA!" << endl;
 		if (flag)
 		{
 			mesh.Faces.push_back(MeshFace(v[0]->info().num, v[1]->info().num, v[2]->info().num,normal));
@@ -1609,9 +1609,11 @@ int main(int argc, char *argv[])
 	ofs3.close();
 	std::cout << "finished writing facets." << endl;
 	std::cout << "release triangulation." << endl;
+	std::cout << "Press enter to continue" << endl;
+	std::cin.get();
 	T.clear();
-	//MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh);
-	//delete MS;
+	MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh);
+	delete MS;
 	string filename1 = NAME + ".stl";    //vertices
 	ofstream ofs(filename1);
 	std::cout << "start writing file" << "[" << filename1 << "]" << endl;

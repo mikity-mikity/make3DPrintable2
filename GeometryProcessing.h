@@ -337,7 +337,8 @@ namespace GeometryProcessing
 		{
 			int _nVertices = (int)val->Vertices.size();
 			int _nFaces = (int)val->Faces.size();
-
+			faces.clear();
+			vertices.clear();
 
 			for (int i = 0; i < _nVertices; i++)
 			{
@@ -419,8 +420,6 @@ namespace GeometryProcessing
 						}
 					}
 					if (candidates.size()>1){
-						//std::cout << "candidates.size():" << candidates.size() << endl;
-						//std::cout << candidates[0].first->owner->N << ":" << candidates[0].first->owner->corner[0] << "," << candidates[0].first->owner->corner[1] << "," << candidates[0].first->owner->corner[2] << endl;
 						count2++;
 						face* FA = p->owner;
 						vector<std::pair<halfedge*,bool>> candidates2;
@@ -435,13 +434,10 @@ namespace GeometryProcessing
 							if (itr->second){
 								d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
 							}
-							//a = a / a.norm();
-							//d = d / d.norm();
 							double valB = CGAL::cross_product(a, NA)*CGAL::cross_product(d, NB);
 							if (valB > 0){
 								candidates2.push_back(*itr);
 							}
-							//std::cout << "valB=" << valB<<","<<itr->second << endl;
 						}
 
 						//std::cout << "Press enter to continue" << endl;
@@ -457,7 +453,9 @@ namespace GeometryProcessing
 						}
 						else if (candidates2.size() == 0)
 						{
-							std::cout << "this is not good." << endl;
+							std::cout << "find an error" << endl;
+							std::cout << "candidates.size():" << candidates.size() << endl;
+							std::cout << FA->N << ":" << FA->corner[0] << "," << FA->corner[1] << "," << FA->corner[2] << endl;
 							for (auto itr = candidates.begin(); itr != candidates.end(); itr++)
 							{
 								auto hf = itr->first;
@@ -478,7 +476,7 @@ namespace GeometryProcessing
 							std::cin.get();
 						}else
 						{
-							//std::cout << "cadidates2.size():" << candidates2.size() << endl;
+							std::cout << "candidates.size()"<<candidates.size()<<","<<"cadidates2.size():" << candidates2.size() << endl;
 							//calculate dihedral angle
 							vector<double> angles;
 							for (auto itr = candidates2.begin(); itr != candidates2.end(); itr++)
@@ -532,11 +530,6 @@ namespace GeometryProcessing
 					}
 					else
 					{
-						//std::cout << "candidates.size():" << candidates.size() << endl;
-						//std::cout << p->P->N << "->" << p->next->P->N<<"->"<<p->next->next->P->N << "->"<<p->next->next->next->P->N<<endl;
-						//std::cout << candidates[0].first->owner->N << ":" << candidates[0].first->owner->corner[0] << "," << candidates[0].first->owner->corner[1] << "," << candidates[0].first->owner->corner[2] << endl;
-						//std::cout << "Press enter to continue" << endl;
-						//std::cin.get();
 						p->pair = candidates[0].first;
 						count1++;
 						if (candidates[0].second)
@@ -548,9 +541,10 @@ namespace GeometryProcessing
 				}
 			}
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
-			std::cout << "CCount1:" << count1 << "/" << "CCount2:" << count2 << endl;
-			count1 = 0;
+			std::cout << "CCount1:" << CCount1 << "/" << "CCount2:" << CCount2 << endl;
+			/*count1 = 0;
 			count2 = 0;
+
 			for (auto hf : halfedges)
 			{
 				if (hf->pair->pair == hf)
@@ -563,6 +557,7 @@ namespace GeometryProcessing
 				}
 			}
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
+			*/
 			std::cout << "Press enter to continue" << endl;
 			std::cin.get();
 			/*			for (int i = 0; i < val->Vertices.size(); i++)

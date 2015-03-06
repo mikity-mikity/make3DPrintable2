@@ -9,12 +9,12 @@ namespace GeometryProcessing
 	class face
     {
 	public:
-        int N;
-        int corner[3];
+        __int64 N;
+        __int64 corner[3];
         halfedge *firsthalfedge;
 		face();
-		void face::setup(int _N, int A, int B, int C);
-		face(int _N, int A, int B, int C);
+		void face::setup(__int64 _N, __int64 A, __int64 B, __int64 C);
+		face(__int64 _N, __int64 A, __int64 B, __int64 C);
     };
 }
 #endif

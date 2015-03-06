@@ -1,8 +1,4 @@
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/Random.h>
-#include <CGAL/Triangulation_vertex_base_with_info_3.h>
-#include <CGAL/Surface_mesh_default_triangulation_3.h>
+
 #include <ppl.h>
 #include <array>
 #include <vector>
@@ -672,6 +668,7 @@ void generate_exterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &ec
 Delaunay triangulate(std::vector<std::pair<Point, col_int>> &exterior)
 {
 	Delaunay T;
+
 	for (int i = 0; i<20; i++)
 	{
 		std::vector<std::pair<Point, col_int>>::iterator be = exterior.begin() + exterior.size()*i / 20;
@@ -683,12 +680,18 @@ Delaunay triangulate(std::vector<std::pair<Point, col_int>> &exterior)
 	std::cout<<endl;
 	return T;
 }
-void asign_index_to_cells(std::map<Delaunay::Cell_handle,__int64> &index,Delaunay &T)
+void asign_index_to_cells(Delaunay &T)
 {
-	__int64 N=0;
-	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)
+	for (auto itr = T.cells_begin(); itr != T.cells_end(); itr++)
 	{
-		index.insert(pair<const Delaunay::Finite_cells_iterator,__int64>(itr,N));
+		itr->info() = -1;
+		//index.insert(pair<const Delaunay::Finite_cells_iterator,__int64>(itr,N));
+	}
+	__int64 N = 0;
+	for (auto itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++)
+	{
+		itr->info() = N;
+		//index.insert(pair<const Delaunay::Finite_cells_iterator,__int64>(itr,N));
 		N++;
 	}
 }
@@ -1044,9 +1047,9 @@ int main(int argc, char *argv[])
 	exterior.clear();
 	std::cout<<"T.number_of_vertices:"<<T.number_of_vertices()<<endl;
 	std::cout<<"number_of_finite_cells:"<<T.number_of_finite_cells()<<endl;
-	std::map<Delaunay::Cell_handle, __int64> index;
-	std::cout << "create index" << endl;
-	asign_index_to_cells(index,T);
+	//std::map<Delaunay::Cell_handle, __int64> index;
+	//std::cout << "create index" << endl;
+	asign_index_to_cells(T);
 	std::cout<<"start cell search"<<endl;
 
 	
@@ -1071,7 +1074,7 @@ int main(int argc, char *argv[])
 	
 	std::cout<<"interior.size():"<< size<<endl;
 	
-	computeInterior(data, eclipseTree, baseRes, [&cells, &index, &T](info& myInfo, __int64& numInterior){
+	computeInterior(data, eclipseTree, baseRes, [&cells, &T](info& myInfo, __int64& numInterior){
 
 			Cell_handle c;
 					
@@ -1137,8 +1140,7 @@ int main(int argc, char *argv[])
 					
 					if(lt==Locate_type::CELL)
 					{
-							std::map<Delaunay::Cell_handle,__int64>::iterator it_c=index.find(c);
-							__int64 d=it_c->second;
+							__int64 d=c->info();
 							cells[d]++;
 							myInfo.before=c;
 					}
@@ -1166,7 +1168,7 @@ int main(int argc, char *argv[])
 		++numInterior;
 	}, 0);
 	std::cout << "interior2.size():" << size2 << endl;
-	computeInterior2(mesh_infos, baseRes, [&cells, &index, &T](info2& myInfo, __int64& numInterior){
+	computeInterior2(mesh_infos, baseRes, [&cells, &T](info2& myInfo, __int64& numInterior){
 		int li, lj;
 		Locate_type lt;
 		Cell_handle c;
@@ -1176,8 +1178,7 @@ int main(int argc, char *argv[])
 			c = T.locate(myInfo.p, lt, li, lj, myInfo.before);
 		if (lt == Locate_type::CELL)
 		{
-			std::map<Delaunay::Cell_handle, __int64>::iterator it_c = index.find(c);
-			__int64 d = it_c->second;
+			__int64 d = c->info();
 			cells[d]++;
 			myInfo.before = c;
 		}
@@ -1231,7 +1232,7 @@ int main(int argc, char *argv[])
 	N=0;
 	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)
 	{
-		if(bool_list[index.find(itr)->second]==false)
+		if(bool_list[itr->info()]==false)
 		{
 			_cells.insert(std::make_pair(itr,N));
 			totalCount++;
@@ -1298,14 +1299,14 @@ int main(int argc, char *argv[])
 	std::cout<<endl;
 	std::cout<<cell_group.size()<<"groups found"<<endl;
 	count=0;
-	parallel_for_each(cell_group.begin(), cell_group.end(), [&index,&bool_list,&count](std::list<Cell_handle> itr)
+	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list,&count](std::list<Cell_handle> itr)
 	{
 		bool flag=false;
 		for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
 		{
 			for(int i=0;i<4;i++)
 			{
-				if(index.find((*itr2)->neighbor(i))==index.end())
+				if(itr2->neighbor(i).info()==-1)
 				{
 					flag=true;
 				}
@@ -1316,7 +1317,7 @@ int main(int argc, char *argv[])
 		{
 			for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
 			{
-				bool_list[index.find(*itr2)->second]=true;
+				bool_list[itr2->info()]=true;
 				//everything++;
 				count++;
 			}
@@ -1338,7 +1339,7 @@ int main(int argc, char *argv[])
 	N=0;
 	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)
 	{
-		if(bool_list[index.find(itr)->second]==true)
+		if(bool_list[itr->info()]==true)
 		{
 			_cells.insert(std::make_pair(itr,N));
 			totalCount++;
@@ -1409,7 +1410,7 @@ int main(int argc, char *argv[])
 	std::cout<<cell_group.size()<<"groups found"<<endl;
 	count=0;
 	int survived=0;
-	parallel_for_each(cell_group.begin(), cell_group.end(), [&index,&bool_list,&count,&survived](std::list<Cell_handle> itr)
+	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list,&count,&survived](std::list<Cell_handle> itr)
 	{
 		bool flag=false;
 		if(itr.size()<20)flag=true;
@@ -1418,7 +1419,7 @@ int main(int argc, char *argv[])
 		{
 			for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
 			{
-				bool_list[index.find(*itr2)->second]=false;
+				bool_list[itr2->info()]=false;
 				//everything++;
 				count++;
 			}
@@ -1447,9 +1448,9 @@ int main(int argc, char *argv[])
 			{
 				Delaunay::Cell_handle _neighbor = itr->neighbor(i);
 				std::map<Delaunay::Cell_handle, __int64>::iterator it_N = index.find(_neighbor);
-				if (it_N != index.end())
+				if (_neighbor.info() != -1)
 				{
-					if (!bool_list[it_N->second])count++;
+					if (!bool_list[_neighbor.info()])count++;
 				}
 				else
 				{
@@ -1485,26 +1486,23 @@ int main(int argc, char *argv[])
 	std::vector<Delaunay::Facet> facet_list;
 	std::cout<<"count up boundary facets"<<endl;
 	
-	NN = index.size() / 20;
+	NN = T.number_of_finite_cells() / 20;
 	if (NN<1)NN = 1;
 	critical_section cs;
 	string filename4 = NAME + ".bound";    //vertices
 	ofstream ofs4(filename4);
 	//for_each(index.begin(), index.end(), [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](std::pair<Delaunay::Cell_handle, __int64> cell)
 	N = 0;
-	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++,N++)/* [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](Delaunay::Cell_handle cell)*/
+	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)/* [&T, &index, &bool_list, &NN, &facet_list, &cs,&ofs4](Delaunay::Cell_handle cell)*/
 	{
-		//auto cell = *itr;
-		//auto N = cell.second;
-		//auto itr = cell.first;
+		__int64 N = itr->info();
 		if(bool_list[N])
 		{
 			for(int i=0;i<4;i++)
 			{
 				Delaunay::Cell_handle nei=itr->neighbor(i);
 				
-				std::map<Delaunay::Cell_handle,__int64>::iterator itr_c=index.find(nei);
-				if(itr_c==index.end())
+				if(nei->info()==-1)
 				{
 					//cs.lock();
 					facet_list.push_back(Delaunay::Facet(itr,i));
@@ -1512,8 +1510,7 @@ int main(int argc, char *argv[])
 					//cs.unlock();
 				}else
 				{
-					__int64 N2=itr_c->second;
-					if (!bool_list[N2])
+					if (!bool_list[nei->info()])
 					{
 						//cs.lock();
 						facet_list.push_back(Delaunay::Facet(itr, i));
@@ -1526,7 +1523,6 @@ int main(int argc, char *argv[])
 		if(((int)N/NN)*NN==N)std::cout<<"*";
 	}//);
 	ofs4.close();
-	index.clear();
 
 	std::cout<<endl;
 	std::cout << "releasing bool_list" << endl;
@@ -1626,9 +1622,9 @@ int main(int argc, char *argv[])
 	if (NN == 0)NN = 1;
 	for (auto face : mesh.Faces)
 	{
-		int A = face.A;
-		int B = face.B;
-		int C = face.C;
+		__int64 A = face.A;
+		__int64 B = face.B;
+		__int64 C = face.C;
 		auto PA = mesh.Vertices[A];
 		auto PB = mesh.Vertices[B];
 		auto PC = mesh.Vertices[C];

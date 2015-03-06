@@ -4,14 +4,14 @@ namespace GeometryProcessing{
 	{
 		firsthalfedge = NULL;
 	}
-	void face::setup(int _N, int A, int B, int C)
+	void face::setup(__int64 _N, __int64 A, __int64 B, __int64 C)
 	{
 		corner[0] = A;
 		corner[1] = B;
 		corner[2] = C;
 		N = _N;
 	}
-	face::face(int _N, int A,int B,int C)
+	face::face(__int64 _N, __int64 A,__int64 B,__int64 C)
 	{
 		corner[0]=A;
 		corner[1]=B;

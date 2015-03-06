@@ -2,17 +2,19 @@
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Random.h>
 #include <CGAL/Triangulation_vertex_base_with_info_3.h>
+#include <CGAL/Triangulation_cell_base_with_info_3.h>
 #include <CGAL/Surface_mesh_default_triangulation_3.h>
+
 struct col_int
 {
 	CGAL::Color col;
-	int num;
+	__int64 num;
 	col_int()
 	{
 		col = CGAL::BLACK;
 		num = 0;
 	}
-	col_int(CGAL::Color _col, int _num)
+	col_int(CGAL::Color _col, __int64 _num)
 	{
 		col = _col;
 		num = _num;
@@ -22,7 +24,8 @@ struct col_int
 };
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Triangulation_vertex_base_with_info_3<col_int, K> Vb;
-typedef CGAL::Triangulation_data_structure_3<Vb>                    Tds;
+typedef CGAL::Triangulation_cell_base_with_info_3<__int64, K> Cb;
+typedef CGAL::Triangulation_data_structure_3<Vb, Cb> Tds;
 typedef CGAL::Delaunay_triangulation_3<K, Tds>                      Delaunay;
 //typedef CGAL::Delaunay_triangulation_3<K,CGAL::Fast_location> Delaunay;
 typedef Delaunay::Point Point;
@@ -42,16 +45,16 @@ namespace GeometryProcessing
 	struct MeshFace
 	{
 	public:
-		int A,B,C;
+		__int64 A,B,C;
 		Vector N;
-		MeshFace(int _A, int _B, int _C)
+		MeshFace(__int64 _A, __int64 _B, __int64 _C)
 		{
 			A = _A;
 			B = _B;
 			C = _C;
 			N = Vector(0, 0, 0);
 		}
-		MeshFace(int _A, int _B, int _C,Vector _N)
+		MeshFace(__int64 _A, __int64 _B, __int64 _C,Vector _N)
 		{
 			A = _A;
 			B = _B;
@@ -760,8 +763,8 @@ namespace GeometryProcessing
 				auto _o = orient::unknown;
 				for (int i = 0; i < 3; i++)
 				{
-					int I = f->corner[i];
-					int J = 0;
+					__int64 I = f->corner[i];
+					__int64 J = 0;
 					if(i == 2) J=f->corner[0];else J=f->corner[i + 1];
 					if (_faceTable.coeffRef(I, J)->size() == 2)
 					{
@@ -831,8 +834,8 @@ namespace GeometryProcessing
 				//list up neighbors that are not oriented
 				for (int i = 0; i < 3; i++)
 				{
-					int I = f->corner[i];
-					int J = 0;
+					__int64 I = f->corner[i];
+					__int64 J = 0;
 					if(i == 2) J=f->corner[0];else J=f->corner[i + 1];
 					if (_faceTable.coeffRef(I, J)->size() == 2)
 					{
@@ -876,8 +879,8 @@ namespace GeometryProcessing
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					int I = f->corner[i];
-					int J=0;
+					__int64 I = f->corner[i];
+					__int64 J=0;
 					if(i == 2) J=f->corner[0];else J= f->corner[i + 1];
 					faceTableAdd(I, J, f);
 				}

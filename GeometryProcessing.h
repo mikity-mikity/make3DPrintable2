@@ -551,7 +551,7 @@ namespace GeometryProcessing
 					count3++;
 				}
 			}
-			std::cout << "count1:" << count1 << "/" << "count2:" <<"/"<< count2 <<"count3:"<<count3<< endl;
+			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << "/" << "count3:" << count3 << endl;
 			
 			std::cout << "Press enter to continue" << endl;
 			std::cin.get();

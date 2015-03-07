@@ -403,7 +403,7 @@ namespace GeometryProcessing
 						if (t->next->P->N == i)
 							candidates.push_back(std::make_pair(t,false));
 					}
-					/*for (auto t : pool)
+					for (auto t : pool)
 					{
 						if (t != p)
 						{
@@ -413,7 +413,7 @@ namespace GeometryProcessing
 									candidates.push_back(std::make_pair(t, true));
 							}
 						}
-					}*/
+					}
 					if (candidates.size() == 0){
 						std::cout << "candidates.size()==0" << endl;
 						std::cin.get();
@@ -537,17 +537,32 @@ namespace GeometryProcessing
 			{
 				if (hf->pair != NULL)
 				{
-					if (hf->pair->pair == hf)
+					if (hf->pair->pair != NULL)
 					{
-						count1++;
+
+						if (hf->pair->pair == hf)
+						{
+							count1++;
+						}
+						else
+						{
+							count2++;
+							std::cout << "error:" << hf->P->N << "-" << hf->next->P->N << endl;
+							std::cout << "error:" << hf->pair->P->N << "-" << hf->pair->next->P->N << endl;
+							std::cout << "F" << hf->owner->N << ":" << hf->owner->corner[0] << "," << hf->owner->corner[1] << "," << hf->owner->corner[2] << endl;
+							std::cout << "F" << hf->pair->owner->N << ":" << hf->pair->owner->corner[0] << "," << hf->pair->owner->corner[1] << "," << hf->pair->owner->corner[2] << endl;
+							std::cout << "F" << hf->pair->pair->owner->N << ":" << hf->pair->pair->owner->corner[0] << "," << hf->pair->pair->owner->corner[1] << "," << hf->pair->pair->owner->corner[2] << endl;
+						}
 					}
 					else
 					{
-						count2++;
+						std::cout << "hf->pair->pair=NULL" << endl;
+						count3++;
 					}
 				}
 				else
 				{
+					std::cout << "hf->pair=NULL" << endl;
 					count3++;
 				}
 			}

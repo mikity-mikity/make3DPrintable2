@@ -1603,8 +1603,8 @@ int main(int argc, char *argv[])
 			normal = -normal;
 			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num,normal));
 		}
-		/*__int64 T1 = 17425;
-		__int64 T2 = 17426;
+		__int64 T1 = 231938;
+		__int64 T2 = 231936;
 		int cc = 0;
 		for (int i = 0; i < 3; i++)
 		{
@@ -1618,7 +1618,7 @@ int main(int argc, char *argv[])
 			std::cout << "V3:" << v[2]->info().num << ":" << v[2]->point().x() << "," << v[2]->point().y() << "," << v[2]->point().z() << endl;
 			std::cout << "N:" << normal.x() << "," << normal.y() << "," << normal.z() << endl;
 			std::cout << "volume=" << CGAL::cross_product(v12, v23)*v14 << endl;
-		}*/
+		}
 	}
 	/*for (auto f : mesh.Faces)
 	{

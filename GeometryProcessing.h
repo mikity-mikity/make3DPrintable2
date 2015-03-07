@@ -392,11 +392,6 @@ namespace GeometryProcessing
 				{
 					//std::cout << "A" << endl;
 					vertex* w=p->next->P;
-					if (i != p->P->N){
-						std::cout << "i!=p->P" << endl;
-						std::cout << "continue" << endl;
-						std::cin.get();
-					}
 					vector<std::pair<halfedge*, bool>> candidates;
 					for (auto t : vectorPool[w->N])
 					{
@@ -530,6 +525,8 @@ namespace GeometryProcessing
 			}
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
 			std::cout << "CCount1:" << CCount1 << "/" << "CCount2:" << CCount2 << endl;
+			std::cout << "Press enter to continue" << endl;
+			std::cin.get();
 			count1 = 0;
 			count2 = 0;
 			int count3 = 0;

@@ -994,172 +994,173 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 
 int main(int argc, char *argv[])
 {
-	if(argc<2)return 0;
-	string filename=argv[1];   //input filename
-    std::vector<string> left_right;
-	
-	boost::algorithm::split(left_right , filename, boost::algorithm::is_any_of("."));
-	string NAME=left_right[0];
+	if (argc < 2)return 0;
+	string filename = argv[1];   //input filename
+	std::vector<string> left_right;
 
-	PI=boost::math::constants::pi<double>();
-	std::cout<<"start reading file"<<"["<<filename<<"]"<<endl;
+	boost::algorithm::split(left_right, filename, boost::algorithm::is_any_of("."));
+	string NAME = left_right[0];
+
+	PI = boost::math::constants::pi<double>();
+	std::cout << "start reading file" << "[" << filename << "]" << endl;
 
 
 	//File write	
 
 	std::vector<Rad_branch> data;
 	std::vector<Thick_mesh> mData;
-	double minR,minT;
-	boost::tie(minR,minT)=read(filename,data,mData);
-	double baseRes=std::min(minT/4.,minR*2*PI/12.);
-	cout<<"baseRes="<<baseRes<<endl;
-	std::vector<boost::tuple<double,Mesh*,GeometryProcessing::MeshStructure*>> meshStructures;
+	double minR, minT;
+	boost::tie(minR, minT) = read(filename, data, mData);
+	double baseRes = std::min(minT / 4., minR * 2 * PI / 12.);
+	cout << "baseRes=" << baseRes << endl;
+	std::vector<boost::tuple<double, Mesh*, GeometryProcessing::MeshStructure*>> meshStructures;
 
-	for(auto tM:mData)
+	for (auto tM : mData)
 	{
 		double t;
 		Mesh *m;
-		boost::tie(t,m)=tM;
-		GeometryProcessing::MeshStructure *MS=GeometryProcessing::MeshStructure::CreateFrom(m);
-		meshStructures.push_back(boost::make_tuple(t,m,MS));
+		boost::tie(t, m) = tM;
+		GeometryProcessing::MeshStructure *MS = GeometryProcessing::MeshStructure::CreateFrom(m);
+		meshStructures.push_back(boost::make_tuple(t, m, MS));
 	}
-	vector<boost::tuple<double,GeometryProcessing::MeshStructure*,std::map<vertex*,boost::tuple<Eigen::Vector3d,Eigen::Vector3d>>>> mesh_infos;
-	for(auto MS:meshStructures)
+	vector<boost::tuple<double, GeometryProcessing::MeshStructure*, std::map<vertex*, boost::tuple<Eigen::Vector3d, Eigen::Vector3d>>>> mesh_infos;
+	for (auto MS : meshStructures)
 	{
 		mesh_infos.push_back(computeNormal(MS));
 	}
-	std::vector<std::pair<Point,col_int>> exterior;
+	std::vector<std::pair<Point, col_int>> exterior;
 	std::vector<eclipses*> eclipseTree;
-	generate_eclipseTree(data,eclipseTree);
+	generate_eclipseTree(data, eclipseTree);
 
-	std::cout<<"construct exterior"<<endl;
-	for(auto tMS:mesh_infos)
+	std::cout << "construct exterior" << endl;
+	for (auto tMS : mesh_infos)
 	{
-		generate_exterior2(tMS,baseRes,exterior);
+		generate_exterior2(tMS, baseRes, exterior);
 	}
-	generate_exterior(data,eclipseTree,baseRes,exterior);
-	std::cout<<"exterior.size()"<<exterior.size()<<endl;
+	generate_exterior(data, eclipseTree, baseRes, exterior);
+	std::cout << "exterior.size()" << exterior.size() << endl;
 
-	
+
 	// building their Delaunay triangulation.
-	std::cout<<"start triangulation"<<endl;
+	std::cout << "start triangulation" << endl;
 	Delaunay T = triangulate(exterior);
-	std::cout<<"end triangulation"<<endl;
+	std::cout << "end triangulation" << endl;
 	exterior.clear();
-	std::cout<<"T.number_of_vertices:"<<T.number_of_vertices()<<endl;
-	std::cout<<"number_of_finite_cells:"<<T.number_of_finite_cells()<<endl;
+	std::cout << "T.number_of_vertices:" << T.number_of_vertices() << endl;
+	std::cout << "number_of_finite_cells:" << T.number_of_finite_cells() << endl;
 	//std::map<Delaunay::Cell_handle, __int64> index;
 	//std::cout << "create index" << endl;
 	asign_index_to_cells(T);
-	std::cout<<"start cell search"<<endl;
+	std::cout << "start cell search" << endl;
 
-	
-	__int64* cells=new __int64[T.number_of_finite_cells()];
-	
-	std::cout<<"initialize cells"<<endl;
-	init_cells(T,cells);
 
-	
-	
+	__int64* cells = new __int64[T.number_of_finite_cells()];
+
+	std::cout << "initialize cells" << endl;
+	init_cells(T, cells);
+
+
+
 	//compute total number of interior points
 
-	__int64 size=computeInterior(data,eclipseTree,baseRes,[](info& myInfo,__int64& numInterior){
-		for(double ss=0.5;ss<myInfo.DIV;ss++)
+	__int64 size = computeInterior(data, eclipseTree, baseRes, [](info& myInfo, __int64& numInterior){
+		for (double ss = 0.5; ss < myInfo.DIV; ss++)
+		{
+			for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
 			{
-				for(auto particle=myInfo.particles.begin();particle!=myInfo.particles.end();particle++)
-				{
-					++numInterior;
-				}
+				++numInterior;
 			}
+		}
 	}, 0);
-	
-	std::cout<<"interior.size():"<< size<<endl;
-	
+
+	std::cout << "interior.size():" << size << endl;
+
 	computeInterior(data, eclipseTree, baseRes, [&cells, &T](info& myInfo, __int64& numInterior){
 
-			Cell_handle c;
-					
-			if(myInfo.itrC==myInfo.branch->begin())
+		Cell_handle c;
+
+		if (myInfo.itrC == myInfo.branch->begin())
+		{
+			Vector Z(0, 0, 1);
+			double t = myInfo.V*Z;
+			if (std::fabs(t) > 0.9)
 			{
-				Vector Z(0,0,1);
-				double t=myInfo.V*Z;
-				if(std::fabs(t)>0.9)
-				{
-					Z=Vector(0,1,0);
-				}
-				myInfo.beforeX=CGAL::cross_product(myInfo.V,Z);
-				myInfo.beforeY=CGAL::cross_product(myInfo.V,myInfo.beforeX);
-				myInfo.beforeX=myInfo.beforeX/std::sqrt(myInfo.beforeX.squared_length());
-				myInfo.beforeY=myInfo.beforeY/std::sqrt(myInfo.beforeY.squared_length());
-			}else
-			{				
-				//project beforeX and beforeY to the plane at the node
-				double cx=-(myInfo.beforeX*myInfo.itrD->Normal)/(myInfo.V*myInfo.itrD->Normal);
-				double cy=-(myInfo.beforeY*myInfo.itrD->Normal)/(myInfo.V*myInfo.itrD->Normal);
-				Vector tmpX=myInfo.beforeX+cx*myInfo.V;
-				Vector tmpY=myInfo.beforeY+cy*myInfo.V;
-
-				//Compute plane	
-				Vector Z(0,0,1);
-				double t=myInfo.V*Z;
-				if(std::fabs(t)>0.9)
-				{
-					Z=Vector(0,1,0);
-				}
-				Vector X=CGAL::cross_product(myInfo.V,Z);
-				Vector Y=CGAL::cross_product(myInfo.V,myInfo.beforeX);
-				Vector N=CGAL::cross_product(X,Y);
-				//project tmpX and tmpY to the plane conformed of X and Y
-				myInfo.beforeX=tmpX-(tmpX*N)*N;
-				myInfo.beforeY=CGAL::cross_product(myInfo.V,myInfo.beforeX);
-				myInfo.beforeX=myInfo.beforeX/std::sqrt(myInfo.beforeX.squared_length());
-				myInfo.beforeY=myInfo.beforeY/std::sqrt(myInfo.beforeY.squared_length());
+				Z = Vector(0, 1, 0);
 			}
+			myInfo.beforeX = CGAL::cross_product(myInfo.V, Z);
+			myInfo.beforeY = CGAL::cross_product(myInfo.V, myInfo.beforeX);
+			myInfo.beforeX = myInfo.beforeX / std::sqrt(myInfo.beforeX.squared_length());
+			myInfo.beforeY = myInfo.beforeY / std::sqrt(myInfo.beforeY.squared_length());
+		}
+		else
+		{
+			//project beforeX and beforeY to the plane at the node
+			double cx = -(myInfo.beforeX*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
+			double cy = -(myInfo.beforeY*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
+			Vector tmpX = myInfo.beforeX + cx*myInfo.V;
+			Vector tmpY = myInfo.beforeY + cy*myInfo.V;
 
-			for(double ss=0.5;ss<myInfo.DIV;ss++)
+			//Compute plane	
+			Vector Z(0, 0, 1);
+			double t = myInfo.V*Z;
+			if (std::fabs(t) > 0.9)
 			{
-				double s=((double)ss)/((double)myInfo.DIV);
-				for(auto particle=myInfo.particles.begin();particle!=myInfo.particles.end();particle++)
-				{
-					Vector B=myInfo.beforeX*(*particle).x()+myInfo.beforeY*(*particle).y();
-					int li, lj;
-					Locate_type lt;
-
-					//Project N
-					double c1=-(B*myInfo.itrD->Normal)/(myInfo.V*myInfo.itrD->Normal);
-					double c2=-(B*(myInfo.itrD+1)->Normal)/(myInfo.V*(myInfo.itrD+1)->Normal);
-					Vector tmp1=B+c1*myInfo.V;
-					Vector tmp2=B+c2*myInfo.V;
-					Point D1=(*myInfo.itrC)+tmp1;
-					Point D2=(*(myInfo.itrC+1))+tmp2;
-					Point D(D2.x()*s+D1.x()*(1-s),D2.y()*s+D1.y()*(1-s),D2.z()*s+D1.z()*(1-s));
-					if(myInfo.before==NULL)
-						c = T.locate(D, lt,li,lj);
-					else
-						c=T.locate(D,lt,li,lj,myInfo.before);
-					
-					
-					if(lt==Locate_type::CELL)
-					{
-							__int64 d=c->info();
-							cells[d]++;
-							myInfo.before=c;
-					}
-					
-					++numInterior;
-				}
+				Z = Vector(0, 1, 0);
 			}
-	
+			Vector X = CGAL::cross_product(myInfo.V, Z);
+			Vector Y = CGAL::cross_product(myInfo.V, myInfo.beforeX);
+			Vector N = CGAL::cross_product(X, Y);
+			//project tmpX and tmpY to the plane conformed of X and Y
+			myInfo.beforeX = tmpX - (tmpX*N)*N;
+			myInfo.beforeY = CGAL::cross_product(myInfo.V, myInfo.beforeX);
+			myInfo.beforeX = myInfo.beforeX / std::sqrt(myInfo.beforeX.squared_length());
+			myInfo.beforeY = myInfo.beforeY / std::sqrt(myInfo.beforeY.squared_length());
+		}
+
+		for (double ss = 0.5; ss < myInfo.DIV; ss++)
+		{
+			double s = ((double)ss) / ((double)myInfo.DIV);
+			for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
+			{
+				Vector B = myInfo.beforeX*(*particle).x() + myInfo.beforeY*(*particle).y();
+				int li, lj;
+				Locate_type lt;
+
+				//Project N
+				double c1 = -(B*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
+				double c2 = -(B*(myInfo.itrD + 1)->Normal) / (myInfo.V*(myInfo.itrD + 1)->Normal);
+				Vector tmp1 = B + c1*myInfo.V;
+				Vector tmp2 = B + c2*myInfo.V;
+				Point D1 = (*myInfo.itrC) + tmp1;
+				Point D2 = (*(myInfo.itrC + 1)) + tmp2;
+				Point D(D2.x()*s + D1.x()*(1 - s), D2.y()*s + D1.y()*(1 - s), D2.z()*s + D1.z()*(1 - s));
+				if (myInfo.before == NULL)
+					c = T.locate(D, lt, li, lj);
+				else
+					c = T.locate(D, lt, li, lj, myInfo.before);
+
+
+				if (lt == Locate_type::CELL)
+				{
+					__int64 d = c->info();
+					cells[d]++;
+					myInfo.before = c;
+				}
+
+				++numInterior;
+			}
+		}
+
 	}, size);
-	
-	for(vector<Rad_branch>::iterator itr=data.begin();itr!=data.end();itr++)
+
+	for (vector<Rad_branch>::iterator itr = data.begin(); itr != data.end(); itr++)
 	{
-		Rad_branch a=*itr;
-		const branch* _branch=boost::get<1>(a);
+		Rad_branch a = *itr;
+		const branch* _branch = boost::get<1>(a);
 		delete(_branch);
 	}
 	data.clear();
-	for(vector<eclipses*>::iterator itr=eclipseTree.begin();itr!=eclipseTree.end();itr++)
+	for (vector<eclipses*>::iterator itr = eclipseTree.begin(); itr != eclipseTree.end(); itr++)
 	{
 		delete(*itr);
 	}
@@ -1198,18 +1199,18 @@ int main(int argc, char *argv[])
 	}
 	meshStructures.clear();
 
-	std::cout<<"start cell locate"<<endl;	
-	__int64 N=0;
+	std::cout << "start cell locate" << endl;
+	__int64 N = 0;
 
-	std::cout<<endl;
-	
-	std::cout<<"T.number_of_finite_cells:"<<T.number_of_finite_cells()<<endl;
-	std::cout<<"T.number_of_finite_facets:"<<T.number_of_finite_facets()<<endl;
-	bool* bool_list=new bool[T.number_of_finite_cells()];
+	std::cout << endl;
 
-	N=0;
-	double D=0.4;
-	__int64 count=0;
+	std::cout << "T.number_of_finite_cells:" << T.number_of_finite_cells() << endl;
+	std::cout << "T.number_of_finite_facets:" << T.number_of_finite_facets() << endl;
+	bool* bool_list = new bool[T.number_of_finite_cells()];
+
+	N = 0;
+	double D = 0.4;
+	__int64 count = 0;
 	for (Delaunay::Finite_cells_iterator itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++, N++)
 	{
 		if (itr->vertex(0)->info().col == CGAL::RED&&itr->vertex(1)->info().col == CGAL::RED&&itr->vertex(2)->info().col == CGAL::RED&&itr->vertex(3)->info().col == CGAL::RED)
@@ -1220,42 +1221,42 @@ int main(int argc, char *argv[])
 		{
 			bool_list[N] = true;
 		}
-		if(cells[N]>=1)bool_list[N]=true;
+		if (cells[N] >= 1)bool_list[N] = true;
 	}
 	__int64 NN;
-	/*std::cout<<"start refine"<<endl;
+	/*std::cout << "start refine" << endl;
 	std::cout << "erase bubbles" << endl;
-	std::map<Cell_handle,__int64> _cells; 
-	std::list<Cell_handle> cells1; 
-	std::list<Cell_handle> cells2; 
+	std::map<Cell_handle, __int64> _cells;
+	std::list<Cell_handle> cells1;
+	std::list<Cell_handle> cells2;
 	std::vector<std::list<Cell_handle>> cell_group;
-	__int64 totalCount=0;
-	N=0;
-	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)
+	__int64 totalCount = 0;
+	N = 0;
+	for (auto itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++)
 	{
-		if(bool_list[itr->info()]==false)
+		if (bool_list[itr->info()] == false)
 		{
-			_cells.insert(std::make_pair(itr,N));
+			_cells.insert(std::make_pair(itr, N));
 			totalCount++;
 			N++;
 		}
 	}
-	NN=totalCount/20;
-	if(NN<1)NN=1;
+	NN = totalCount / 20;
+	if (NN < 1)NN = 1;
 	cells2.push_back(_cells.begin()->first);
 	_cells.erase(_cells.begin()->first);
-	N=0;
-	std::cout<<"totalCount:"<<totalCount<<endl;
-	while(!_cells.empty())
+	N = 0;
+	std::cout << "totalCount:" << totalCount << endl;
+	while (!_cells.empty())
 	{
-		std::list<Cell_handle> cells3; 
-		while(!cells2.empty())
+		std::list<Cell_handle> cells3;
+		while (!cells2.empty())
 		{
 			if (!_cells.empty())
 			{
 				for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
 				{
-					for(int i=0;i<4;i++)
+					for (int i = 0; i < 4; i++)
 					{
 						Cell_handle nei = (*itr)->neighbor(i);
 						std::map<Cell_handle, __int64>::iterator it = _cells.find(nei);
@@ -1264,61 +1265,61 @@ int main(int argc, char *argv[])
 							cells1.push_back(nei);
 							_cells.erase(nei);
 							N++;
-							if((N/NN)*NN==N)std::cout<<"*";
+							if ((N / NN)*NN == N)std::cout << "*";
 						}
 					}
 				}
 			}
-			for(auto itr=cells2.begin();itr!=cells2.end();itr++)
+			for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
 			{
 				cells3.push_back(*itr);
 			}
 			cells2.clear();
-			if(!cells1.empty()){
-				for(auto itr=cells1.begin();itr!=cells1.end();itr++)
+			if (!cells1.empty()){
+				for (auto itr = cells1.begin(); itr != cells1.end(); itr++)
 				{
 					cells2.push_back(*itr);
 				}
 				cells1.clear();
 			}
 		}
-		if(!cells2.empty())
+		if (!cells2.empty())
 		{
-			for(auto itr=cells2.begin();itr!=cells2.end();itr++)
+			for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
 			{
 				cells3.push_back(*itr);
 			}
 		}
 		if (!cells3.empty())
 			cell_group.push_back(cells3);
-		if(!_cells.empty())
+		if (!_cells.empty())
 		{
 			cells2.push_back(_cells.begin()->first);
 			_cells.erase(_cells.begin()->first);
 		}
 	}
-	std::cout<<endl;
-	std::cout<<cell_group.size()<<"groups found"<<endl;
-	count=0;
-	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list,&count](std::list<Cell_handle> itr)
+	std::cout << endl;
+	std::cout << cell_group.size() << "groups found" << endl;
+	count = 0;
+	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list, &count](std::list<Cell_handle> itr)
 	{
-		bool flag=false;
-		for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
+		bool flag = false;
+		for (auto itr2 = (itr).begin(); itr2 != (itr).end(); itr2++)
 		{
-			for(int i=0;i<4;i++)
+			for (int i = 0; i < 4; i++)
 			{
-				if(itr2->neighbor(i).info()==-1)
+				if ((*itr2)->neighbor(i)->info() == -1)
 				{
-					flag=true;
+					flag = true;
 				}
 			}
-			if(flag)break;
+			if (flag)break;
 		}
-		if(!flag)
+		if (!flag)
 		{
-			for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
+			for (auto itr2 = (itr).begin(); itr2 != (itr).end(); itr2++)
 			{
-				bool_list[itr2->info()]=true;
+				bool_list[(*itr2)->info()] = true;
 				//everything++;
 				count++;
 			}
@@ -1328,41 +1329,41 @@ int main(int argc, char *argv[])
 	cells1.clear();
 	cells2.clear();
 
-	for (auto itr = cell_group.begin(); itr != cell_group.end();itr++)
+	for (auto itr = cell_group.begin(); itr != cell_group.end(); itr++)
 	{
 		itr->clear();
 	}
 	cell_group.clear();
 
-	std::cout<<count<<"cells recovered"<<endl;
+	std::cout << count << "cells recovered" << endl;
 	//in turn, positive cells are investigated ans small groups are eliminated.
-	totalCount=0;
-	N=0;
-	for(auto itr=T.finite_cells_begin();itr!=T.finite_cells_end();itr++)
+	totalCount = 0;
+	N = 0;
+	for (auto itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++)
 	{
-		if(bool_list[itr->info()]==true)
+		if (bool_list[itr->info()] == true)
 		{
-			_cells.insert(std::make_pair(itr,N));
+			_cells.insert(std::make_pair(itr, N));
 			totalCount++;
 			N++;
 		}
 	}
-	NN=totalCount/20;
-	if(NN<1)NN=1;
+	NN = totalCount / 20;
+	if (NN < 1)NN = 1;
 	cells2.push_back(_cells.begin()->first);
 	_cells.erase(_cells.begin()->first);
-	N=0;
-	std::cout<<"totalCount:"<<totalCount<<endl;
-	while(!_cells.empty())
+	N = 0;
+	std::cout << "totalCount:" << totalCount << endl;
+	while (!_cells.empty())
 	{
-		std::list<Cell_handle> cells3; 
-		while(!cells2.empty())
+		std::list<Cell_handle> cells3;
+		while (!cells2.empty())
 		{
 			if (!_cells.empty())
 			{
 				for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
 				{
-					for(int i=0;i<4;i++)
+					for (int i = 0; i < 4; i++)
 					{
 						Cell_handle nei = (*itr)->neighbor(i);
 						std::map<Cell_handle, __int64>::iterator it = _cells.find(nei);
@@ -1371,19 +1372,19 @@ int main(int argc, char *argv[])
 							cells1.push_back(nei);
 							_cells.erase(nei);
 							N++;
-							if((N/NN)*NN==N)std::cout<<"*";
+							if ((N / NN)*NN == N)std::cout << "*";
 						}
 					}
 				}
 			}
-			for(auto itr=cells2.begin();itr!=cells2.end();itr++)
+			for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
 			{
 				//std::cout << "5" << endl;
 				cells3.push_back(*itr);
 			}
 			cells2.clear();
-			if(!cells1.empty()){
-				for(auto itr=cells1.begin();itr!=cells1.end();itr++)
+			if (!cells1.empty()){
+				for (auto itr = cells1.begin(); itr != cells1.end(); itr++)
 				{
 					//std::cout << "6" << endl;
 					cells2.push_back(*itr);
@@ -1391,9 +1392,9 @@ int main(int argc, char *argv[])
 				cells1.clear();
 			}
 		}
-		if(!cells2.empty())
+		if (!cells2.empty())
 		{
-			for(auto itr=cells2.begin();itr!=cells2.end();itr++)
+			for (auto itr = cells2.begin(); itr != cells2.end(); itr++)
 			{
 				cells3.push_back(*itr);
 			}
@@ -1401,26 +1402,26 @@ int main(int argc, char *argv[])
 		//std::cout << "7" << endl;
 		if (!cells3.empty())
 			cell_group.push_back(cells3);
-		if(!_cells.empty())
+		if (!_cells.empty())
 		{
 			cells2.push_back(_cells.begin()->first);
 			_cells.erase(_cells.begin()->first);
 		}
 	}
-	std::cout<<endl;
-	std::cout<<cell_group.size()<<"groups found"<<endl;
-	count=0;
-	int survived=0;
-	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list,&count,&survived](std::list<Cell_handle> itr)
+	std::cout << endl;
+	std::cout << cell_group.size() << "groups found" << endl;
+	count = 0;
+	int survived = 0;
+	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list, &count, &survived](std::list<Cell_handle> itr)
 	{
-		bool flag=false;
-		if(itr.size()<20)flag=true;
-		if(!flag)survived++;
-		if(flag)
+		bool flag = false;
+		if (itr.size() < 20)flag = true;
+		if (!flag)survived++;
+		if (flag)
 		{
-			for(auto itr2=(itr).begin();itr2!=(itr).end();itr2++)
+			for (auto itr2 = (itr).begin(); itr2 != (itr).end(); itr2++)
 			{
-				bool_list[itr2->info()]=false;
+				bool_list[(*itr2)->info()] = false;
 				//everything++;
 				count++;
 			}
@@ -1435,8 +1436,8 @@ int main(int argc, char *argv[])
 	}
 	cell_group.clear();
 
-	std::cout<<count<<" cells eliminated"<<endl;
-	std::cout<<survived<<" groups survived"<<endl;
+	std::cout << count << " cells eliminated" << endl;
+	std::cout << survived << " groups survived" << endl;
 	std::cout << "look up isolated tets." << endl;
 	N = 0;
 	__int64 num = 0;
@@ -1445,20 +1446,20 @@ int main(int argc, char *argv[])
 		if (bool_list[N] == true)
 		{
 			int count = 0;
-			for (int i = 0; i<4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				Delaunay::Cell_handle _neighbor = itr->neighbor(i);
-				std::map<Delaunay::Cell_handle, __int64>::iterator it_N = index.find(_neighbor);
-				if (_neighbor.info() != -1)
+				//std::map<Delaunay::Cell_handle, __int64>::iterator it_N = index.find(_neighbor);
+				if (_neighbor->info() != -1)
 				{
-					if (!bool_list[_neighbor.info()])count++;
+					if (!bool_list[_neighbor->info()])count++;
 				}
 				else
 				{
 					count++;
 				}
 			}
-			if (count==4){
+			if (count == 4){
 				bool_list[N] = false;
 				//everything++;
 				num++;
@@ -1467,7 +1468,7 @@ int main(int argc, char *argv[])
 
 	}
 
-	std::cout << "found "<<num<<" isolated tets. They were eliminated." << endl;
+	std::cout << "found " << num << " isolated tets. They were eliminated." << endl;
 	*/
 	//std::cout<<"press enter to continue"<<endl;
 	//std::cin.get();
@@ -1533,9 +1534,9 @@ int main(int argc, char *argv[])
 	});
 	Mesh mesh;
 	int vertexCount = 0;
-	std::cout << "start writing facet_list" << endl;
-	string filename3 = NAME + ".facets";    //vertices
-	ofstream ofs3(filename3);
+	//std::cout << "start writing facet_list" << endl;
+	//string filename3 = NAME + ".facets";    //vertices
+	//ofstream ofs3(filename3);
 	for (auto F : facet_list)
 	{
 		Delaunay::Cell_handle cell = F.first;
@@ -1588,7 +1589,7 @@ int main(int argc, char *argv[])
 		auto v23 = v[2]->point() - v[1]->point();
 		auto v14 = v[3]->point() - v[0]->point();
 		auto normal=CGAL::cross_product(v12, v23);
-		if (std::sqrt(normal.squared_length()) < 0.001)std::cout << "YA!" << std::sqrt(normal.squared_length()) << endl;
+		//if (std::sqrt(normal.squared_length()) < 0.001)std::cout << "YA!" << std::sqrt(normal.squared_length()) << endl;
 		normal = normal / std::sqrt(normal.squared_length());
 		//judge orientation
 		bool flag = true;
@@ -1599,9 +1600,10 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num, -normal));
+			normal = -normal;
+			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num,normal));
 		}
-		__int64 T1 = 17425;
+		/*__int64 T1 = 17425;
 		__int64 T2 = 17426;
 		int cc = 0;
 		for (int i = 0; i < 3; i++)
@@ -1614,15 +1616,16 @@ int main(int argc, char *argv[])
 			std::cout << "V1:" << v[0]->info().num << ":" << v[0]->point().x() << "," << v[0]->point().y() << "," << v[0]->point().z() << endl;
 			std::cout << "V2:" << v[1]->info().num << ":" << v[1]->point().x() << "," << v[1]->point().y() << "," << v[1]->point().z() << endl;
 			std::cout << "V3:" << v[2]->info().num << ":" << v[2]->point().x() << "," << v[2]->point().y() << "," << v[2]->point().z() << endl;
+			std::cout << "N:" << normal.x() << "," << normal.y() << "," << normal.z() << endl;
 			std::cout << "volume=" << CGAL::cross_product(v12, v23)*v14 << endl;
-		}
+		}*/
 	}
-	for (auto f : mesh.Faces)
+	/*for (auto f : mesh.Faces)
 	{
 		ofs3 << f.A << "," << f.B << "," << f.C << endl;
 	}
-	ofs3.close();
-	std::cout << "finished writing facets." << endl;
+	ofs3.close();*/
+	//std::cout << "finished writing facets." << endl;
 	std::cout << "release triangulation." << endl;
 	std::cout << "Press enter to continue" << endl;
 	std::cin.get();

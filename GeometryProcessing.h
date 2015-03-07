@@ -424,11 +424,14 @@ namespace GeometryProcessing
 							face* FB = hf->owner;
 							Vector NA = val->Faces[FA->N].N;
 							Vector NB = val->Faces[FB->N].N;
-							Vector a=val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
-							Vector d=val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+							Vector a = val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
+							Vector d = val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+							Vector V = val->Vertices[p->next->P->N] - val->Vertices[p->P->N];
 							if (itr->second){
 								d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
 							}
+							a = a - V*(a*V / V.squared_length());
+							d = d - V*(d*V / V.squared_length());
 							double valB = CGAL::cross_product(a, NA)*CGAL::cross_product(d, NB);
 							if (valB > 0){
 								candidates2.push_back(*itr);
@@ -448,25 +451,7 @@ namespace GeometryProcessing
 						}
 						else if (candidates2.size() == 0)
 						{
-							std::cout << "find an error" << endl;
-							std::cout << "candidates.size():" << candidates.size() << endl;
-							std::cout << FA->N << ":" << p->P->N << "," << p->next->P->N << endl;
-							for (auto itr = candidates.begin(); itr != candidates.end(); itr++)
-							{
-								auto hf = itr->first;
-								face* FB = hf->owner;
-								auto NA = val->Faces[FA->N].N;
-								auto NB = val->Faces[FB->N].N;
-								Vector a = val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
-								Vector d = val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
-								if (itr->second){
-									d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
-								}
-								//a = a / std::sqrt(a.squared_length);
-								//d = d / std::sqrt(d.squared_length);
-								double valB = CGAL::cross_product(a,NA)*CGAL::cross_product(d,NB);
-								std::cout << "valB=" << valB << endl;
-							}
+							std::cout << "found an error" << endl;
 							std::cout << "Press enter to continue" << endl;
 							std::cin.get();
 						}else
@@ -481,12 +466,13 @@ namespace GeometryProcessing
 								Vector NA=val->Faces[FA->N].N;
 								Vector NB=val->Faces[FB->N].N;
 								Vector a = val->Vertices[p->P->N] - val->Vertices[p->prev->P->N];
-							    Vector d = val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+								Vector d = val->Vertices[hf->next->next->P->N] - val->Vertices[hf->next->P->N];
+								Vector V = val->Vertices[p->next->P->N] - val->Vertices[p->P->N];
 								if (itr->second){
 									d = val->Vertices[hf->prev->P->N] - val->Vertices[hf->P->N];
 								}
-								//a = a / a.norm();
-								//d = d / d.norm();
+								a = a - V*(a*V / V.squared_length());
+								d = d - V*(d*V / V.squared_length());
 
 								double val = CGAL::cross_product(a, NA)*CGAL::cross_product(a, d);
 								bool leftorright = false;
@@ -498,11 +484,14 @@ namespace GeometryProcessing
 								double theta1 = std::acos(cos);  //0-180
 								double theta2 = std::asin(sin);  //-90-90
 								double theta = 0;
-								if (theta2 > 0.0)theta = theta2; else theta = PI2 - theta1;  //0-360
+								if (sin >= 0 && cos >= 0)theta = theta1;//0-90
+								if (sin >= 0 && cos < 0)theta = theta1;//90-180
+								if (sin < 0 && cos < 0)theta = -theta1;//-180 - -90
+								if (sin < 0 && cos >= 0)theta = theta2;//-90 - 0
 
-								if (theta > PI)theta = theta - PI2;
-								angles.push_back(-theta);
-								//if theta is min choose it!
+								
+								angles.push_back(theta);
+								//if theta is max choose it!
 							}
 							//choose index of min theta
 							double max = -1000;
@@ -537,22 +526,29 @@ namespace GeometryProcessing
 			}
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
 			std::cout << "CCount1:" << CCount1 << "/" << "CCount2:" << CCount2 << endl;
-			/*count1 = 0;
+			count1 = 0;
 			count2 = 0;
-
+			int count3 = 0;
 			for (auto hf : halfedges)
 			{
-				if (hf->pair->pair == hf)
+				if (hf->pair != NULL)
 				{
-					count1++;
+					if (hf->pair->pair == hf)
+					{
+						count1++;
+					}
+					else
+					{
+						count2++;
+					}
 				}
 				else
 				{
-					count2++;
+					count3++;
 				}
 			}
-			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
-			*/
+			std::cout << "count1:" << count1 << "/" << "count2:" << count2 <<"count3:"<<count3<< endl;
+			
 			std::cout << "Press enter to continue" << endl;
 			std::cin.get();
 			/*			for (int i = 0; i < val->Vertices.size(); i++)

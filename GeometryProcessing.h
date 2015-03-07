@@ -403,7 +403,7 @@ namespace GeometryProcessing
 						if (t->next->P->N == i)
 							candidates.push_back(std::make_pair(t,false));
 					}
-					for (auto t : pool)
+					/*for (auto t : pool)
 					{
 						if (t != p)
 						{
@@ -413,8 +413,12 @@ namespace GeometryProcessing
 									candidates.push_back(std::make_pair(t, true));
 							}
 						}
-					}
-					if (candidates.size()>1){
+					}*/
+					if (candidates.size() == 0){
+						std::cout << "candidates.size()==0" << endl;
+						std::cin.get();
+						exit(1);
+					}else if (candidates.size()>1){
 						count2++;
 						face* FA = p->owner;
 						vector<std::pair<halfedge*,bool>> candidates2;
@@ -547,7 +551,7 @@ namespace GeometryProcessing
 					count3++;
 				}
 			}
-			std::cout << "count1:" << count1 << "/" << "count2:" << count2 <<"count3:"<<count3<< endl;
+			std::cout << "count1:" << count1 << "/" << "count2:" <<"/"<< count2 <<"count3:"<<count3<< endl;
 			
 			std::cout << "Press enter to continue" << endl;
 			std::cin.get();

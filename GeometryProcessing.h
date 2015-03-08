@@ -333,7 +333,7 @@ namespace GeometryProcessing
             }
 			delete(__orientation);
         }
-		void Construct_already_oriented(Mesh *val)
+		void Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
 		{
 			int _nVertices = (int)val->Vertices.size();
 			int _nFaces = (int)val->Faces.size();
@@ -383,14 +383,14 @@ namespace GeometryProcessing
 			double PI2 = boost::math::constants::pi<double>() * 2.;
 			double PI = boost::math::constants::pi<double>();
 			vector<int> errors;
-			for (int i = 0; i < val->Vertices.size(); i++)
+
+			for (int i = 0; i < _nVertices; i++)
 			{
 				auto pool = vectorPool[i];
 				vertex* v = vertices[i];
 				bool flag = false;
 				for (auto p : pool) //p is a halfedge
 				{
-					//std::cout << "A" << endl;
 					vertex* w=p->next->P;
 					vector<std::pair<halfedge*, bool>> candidates;
 					for (auto t : vectorPool[w->N])
@@ -398,7 +398,7 @@ namespace GeometryProcessing
 						if (t->next->P->N == i)
 							candidates.push_back(std::make_pair(t,false));
 					}
-					for (auto t : pool)
+					/*for (auto t : pool)
 					{
 						if (t != p)
 						{
@@ -408,7 +408,7 @@ namespace GeometryProcessing
 									candidates.push_back(std::make_pair(t, true));
 							}
 						}
-					}
+					}*/
 					if (candidates.size() == 0){
 						std::cout << "candidates.size()==0" << endl;
 						std::cin.get();
@@ -437,8 +437,6 @@ namespace GeometryProcessing
 							}
 						}
 
-						//std::cout << "Press enter to continue" << endl;
-						//std::cin.get();
 						if (candidates2.size() == 1)
 						{
 							p->pair = candidates2[0].first;
@@ -455,7 +453,6 @@ namespace GeometryProcessing
 							std::cin.get();
 						}else
 						{
-							//std::cout << "candidates.size()"<<candidates.size()<<","<<"cadidates2.size():" << candidates2.size() << endl;
 							//calculate dihedral angle
 							vector<double> angles;
 							for (auto itr = candidates2.begin(); itr != candidates2.end(); itr++)
@@ -483,10 +480,6 @@ namespace GeometryProcessing
 								if (cos < -1.)cos = -1.;
 								if (sin > 1.)sin = 1.;
 								if (sin < -1.)sin = -1.;
-								if (p->P->N == 231938 && p->next->P->N == 231936 && p->owner->N == 468608)
-								{
-									std::cout << "sin=" << sin << "," << "cos=" << cos << endl;
-								}
 								if (!leftorright)sin = -sin;
 								double theta1 = std::acos(cos);  //0-180
 								double theta2 = std::asin(sin);  //-90-90
@@ -495,21 +488,9 @@ namespace GeometryProcessing
 								if (sin >= 0 && cos < 0)theta = theta1;//90-180
 								if (sin < 0 && cos < 0)theta = -theta1;//-180 - -90
 								if (sin < 0 && cos >= 0)theta = theta2;//-90 - 0
-
-								
 								angles.push_back(theta);
-								//if theta is max choose it!
 							}
-							if (p->P->N == 231938 && p->next->P->N == 231936&&p->owner->N==468608)
-							{
-								std::cout << "angles:";
-								for (int k = 0; k < angles.size(); k++)
-								{
-									std::cout << angles[k] << ",";
-								}
-								std::cout << endl;
-							}
-							//choose index of min theta
+							//choose index of max theta
 							double max = -1000;
 							int maxIndex = -1000;
 							for (int k = 0; k < angles.size(); k++)
@@ -519,7 +500,6 @@ namespace GeometryProcessing
 									maxIndex = k;
 								}
 							}
-							//std::cout << "F:"<<maxIndex<<"/"<<angles.size() << endl;
 							p->pair = candidates2[maxIndex].first;
 							if (candidates2[maxIndex].second)
 							{
@@ -542,8 +522,6 @@ namespace GeometryProcessing
 			}
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
 			std::cout << "CCount1:" << CCount1 << "/" << "CCount2:" << CCount2 << endl;
-			std::cout << "Press enter to continue" << endl;
-			std::cin.get();
 			count1 = 0;
 			count2 = 0;
 			int count3 = 0;
@@ -562,10 +540,6 @@ namespace GeometryProcessing
 						{
 							count2++;
 							std::cout << "error:" << hf->P->N << "-" << hf->next->P->N << endl;
-							std::cout << "error:" << hf->pair->P->N << "-" << hf->pair->next->P->N << endl;
-							std::cout << "F" << hf->owner->N << ":" << hf->owner->corner[0] << "," << hf->owner->corner[1] << "," << hf->owner->corner[2] << endl;
-							std::cout << "F" << hf->pair->owner->N << ":" << hf->pair->owner->corner[0] << "," << hf->pair->owner->corner[1] << "," << hf->pair->owner->corner[2] << endl;
-							std::cout << "F" << hf->pair->pair->owner->N << ":" << hf->pair->pair->owner->corner[0] << "," << hf->pair->pair->owner->corner[1] << "," << hf->pair->pair->owner->corner[2] << endl;
 						}
 					}
 					else
@@ -581,9 +555,113 @@ namespace GeometryProcessing
 				}
 			}
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << "/" << "count3:" << count3 << endl;
-			
-			std::cout << "Press enter to continue" << endl;
-			std::cin.get();
+			//onestars
+			count1 = 0;
+			count2 = 0;
+			count3 = 0;
+			int __nVertices = _nVertices;
+			for (int i = 0; i < __nVertices; i++)
+			{
+				auto pool = vectorPool[i];
+				auto v = vertices[i];
+				vector<vector<halfedge*>>stars;
+				do
+				{
+					auto h = pool[0];
+					vector<halfedge*>star;
+					do{
+						star.push_back(h);
+						pool.erase(std::find(pool.begin(), pool.end(), h));
+						if (h->isBoundary()) break;
+						h = h->prev->pair;
+					} while (h != star[0]);
+					stars.push_back(star);
+				} while (!pool.empty());
+				if (stars.size() == 1){
+					count1++;
+					if (stars[0].size() == 0)
+					{
+						std::cout << "error" << endl;
+						std::cin.get();
+					}
+					v->hf_begin = stars[0][0];
+					v->star = stars[0];
+				}
+				double x, y, z;
+				if (stars.size() >= 2){
+					count2++;
+					v->hf_begin = stars[0][0];
+					v->star = stars[0];
+					Vector VV(0, 0, 0);
+
+					for (auto s : v->star)
+					{
+						auto cell=facet_list[s->owner->N].first;
+						auto D = facet_list[s->owner->N].second;
+						auto V=cell->vertex(D)->point()-val->Vertices[i];
+						VV = VV+V;
+					}
+					VV = VV / v->star.size();
+					VV = VV/1000;
+					val->Vertices[i] = val->Vertices[i] + VV;
+					int SS = stars.size() - 1;
+					for (int j = 0; j < SS; j++)
+					{
+						vertices.push_back(new vertex(_nVertices + j));
+						VV=Vector(0, 0, 0);
+						for (auto s : stars[j + 1])
+						{
+							auto cell = facet_list[s->owner->N].first;
+							auto D = facet_list[s->owner->N].second;
+							auto V = cell->vertex(D)->point() - val->Vertices[i];
+							VV = VV + V;
+						}
+						VV = VV / v->star.size();
+						VV = VV / 1000;
+						val->Vertices.push_back(val->Vertices[i] + VV);
+						vertices[_nVertices + j]->hf_begin = stars[j + 1][0];
+						vertices[_nVertices + j]->star = stars[j + 1];
+
+						for (auto h : stars[j + 1])
+						{
+							h->P = vertices[_nVertices + j];
+							for (int k = 0; k < 3; k++)
+							{
+								if (h->owner->corner[k] == v->N){
+									h->owner->corner[k] = _nVertices + j;
+									if (k==0)
+										val->Faces[h->owner->N].A = _nVertices + j;
+									if (k == 1)
+										val->Faces[h->owner->N].B = _nVertices + j;
+									if (k == 2)
+										val->Faces[h->owner->N].C = _nVertices + j;
+								}
+							}
+						}
+					}
+					_nVertices += SS;
+				}
+				if (i == 113611)std::cin.get();
+
+			}
+			std::cout << "stars" << endl;
+			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;
+			//post process to create onering
+			for (auto v : vertices)
+			{
+				auto h = v->hf_begin;
+				v->onering.clear();
+				do
+				{
+					do
+					{
+						h = h->next;
+						v->onering.push_back(h);
+					} while (h->next->next->P != v);
+					if (h->next->pair->isBoundary()) break;
+					h = h->next->pair;
+				} while (h != v->hf_begin);
+			}
 			/*			for (int i = 0; i < val->Vertices.size(); i++)
 			{
 				vector<vector<halfedge*>> onestars;
@@ -738,34 +816,6 @@ namespace GeometryProcessing
 				if (e->isNaked()) std::cout << "naked halfedges survive!";
 			}
 
-			//post process to create stars
-			for (auto v : vertices)
-			{
-				auto h = v->hf_begin;
-				v->star.clear();
-				do
-				{
-					v->star.push_back(h);
-					if (h->isBoundary()) break;
-					h = h->prev->pair;
-				} while (h != v->hf_begin);
-			}
-			//post process to create onering
-			for (auto v : vertices)
-			{
-				auto h = v->hf_begin;
-				v->onering.clear();
-				do
-				{
-					do
-					{
-						h = h->next;
-						v->onering.push_back(h);
-					} while (h->next->next->P != v);
-					if (h->next->pair->isBoundary()) break;
-					h = h->next->pair;
-				} while (h != v->hf_begin);
-			}
 			//post process to split the vertices into inner and outer.
 			innerVertices.clear();
 			outerVertices.clear();
@@ -911,10 +961,10 @@ namespace GeometryProcessing
 				ret->Construct(val);
 				return ret;
 			}
-			static MeshStructure* CreateFrom_already_oriented(Mesh *val)
+			static MeshStructure* CreateFrom_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
 			{
 				MeshStructure* ret = new MeshStructure();
-				ret->Construct_already_oriented(val);
+				ret->Construct_already_oriented(val,facet_list);
 				return ret;
 			}
 		public:

@@ -1224,7 +1224,7 @@ int main(int argc, char *argv[])
 		if (cells[N] >= 1)bool_list[N] = true;
 	}
 	__int64 NN;
-	/*std::cout << "start refine" << endl;
+	std::cout << "start refine" << endl;
 	std::cout << "erase bubbles" << endl;
 	std::map<Cell_handle, __int64> _cells;
 	std::list<Cell_handle> cells1;
@@ -1469,7 +1469,7 @@ int main(int argc, char *argv[])
 	}
 
 	std::cout << "found " << num << " isolated tets. They were eliminated." << endl;
-	*/
+	
 	//std::cout<<"press enter to continue"<<endl;
 	//std::cin.get();
 	/*std::cout << "start writing bool_list" << endl;
@@ -1597,6 +1597,7 @@ int main(int argc, char *argv[])
 		if (flag)
 		{
 			mesh.Faces.push_back(MeshFace(v[0]->info().num, v[1]->info().num, v[2]->info().num,normal));
+			//cellList.push_back(cell);
 		}
 		else
 		{
@@ -1626,11 +1627,9 @@ int main(int argc, char *argv[])
 	}
 	ofs3.close();*/
 	//std::cout << "finished writing facets." << endl;
+	MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh, facet_list);
 	std::cout << "release triangulation." << endl;
-	std::cout << "Press enter to continue" << endl;
-	std::cin.get();
 	T.clear();
-	MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh);
 	delete MS;
 	string filename1 = NAME + ".stl";    //vertices
 	ofstream ofs(filename1);

@@ -479,6 +479,14 @@ namespace GeometryProcessing
 								//calculate angle
 								double cos = NA*NB;
 								double sin = std::sqrt(CGAL::cross_product(NA, NB).squared_length());
+								if (cos > 1.)cos = 1.;
+								if (cos < -1.)cos = -1.;
+								if (sin > 1.)sin = 1.;
+								if (sin < -1.)sin = -1.;
+								if (p->P->N == 231938 && p->next->P->N == 231936 && p->owner->N == 468608)
+								{
+									std::cout << "sin=" << sin << "," << "cos=" << cos << endl;
+								}
 								if (!leftorright)sin = -sin;
 								double theta1 = std::acos(cos);  //0-180
 								double theta2 = std::asin(sin);  //-90-90
@@ -491,6 +499,15 @@ namespace GeometryProcessing
 								
 								angles.push_back(theta);
 								//if theta is max choose it!
+							}
+							if (p->P->N == 231938 && p->next->P->N == 231936&&p->owner->N==468608)
+							{
+								std::cout << "angles:";
+								for (int k = 0; k < angles.size(); k++)
+								{
+									std::cout << angles[k] << ",";
+								}
+								std::cout << endl;
 							}
 							//choose index of min theta
 							double max = -1000;

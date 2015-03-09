@@ -335,8 +335,8 @@ namespace GeometryProcessing
         }
 		void Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
 		{
-			int _nVertices = (int)val->Vertices.size();
-			int _nFaces = (int)val->Faces.size();
+			__int64 _nVertices = (int)val->Vertices.size();
+			__int64 _nFaces = (int)val->Faces.size();
 			faces.clear();
 			vertices.clear();
 
@@ -587,7 +587,6 @@ namespace GeometryProcessing
 					v->hf_begin = stars[0][0];
 					v->star = stars[0];
 				}
-				double x, y, z;
 				if (stars.size() >= 2){
 					count2++;
 					v->hf_begin = stars[0][0];
@@ -601,11 +600,11 @@ namespace GeometryProcessing
 						auto V=cell->vertex(D)->point()-val->Vertices[i];
 						VV = VV+V;
 					}
-					VV = VV / v->star.size();
-					VV = VV/1000;
+					VV = VV / ((double)v->star.size());
+					VV = VV/((double)1000);
 					val->Vertices[i] = val->Vertices[i] + VV;
-					int SS = stars.size() - 1;
-					for (int j = 0; j < SS; j++)
+					__int64 SS = stars.size() - 1;
+					for (__int64 j = 0; j < SS; j++)
 					{
 						vertices.push_back(new vertex(_nVertices + j));
 						VV=Vector(0, 0, 0);
@@ -616,8 +615,8 @@ namespace GeometryProcessing
 							auto V = cell->vertex(D)->point() - val->Vertices[i];
 							VV = VV + V;
 						}
-						VV = VV / v->star.size();
-						VV = VV / 1000;
+						VV = VV / ((double)v->star.size());
+						VV = VV / ((double)1000);
 						val->Vertices.push_back(val->Vertices[i] + VV);
 						vertices[_nVertices + j]->hf_begin = stars[j + 1][0];
 						vertices[_nVertices + j]->star = stars[j + 1];
@@ -641,8 +640,6 @@ namespace GeometryProcessing
 					}
 					_nVertices += SS;
 				}
-				if (i == 113611)std::cin.get();
-
 			}
 			std::cout << "stars" << endl;
 			std::cout << "count1:" << count1 << "/" << "count2:" << count2 << endl;

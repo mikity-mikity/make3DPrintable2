@@ -173,7 +173,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 	// read file
 	double minR=10000;
 	double minT=10000;
-
+	double scale = 1.0;
 	ifstream ifs(filename);  //input file
 	if(ifs.fail()){
 		std::cout<<"File does not exist."<<endl;
@@ -187,7 +187,12 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		char _prefix[20];
 		sscanf(words[0].data(),"%s",_prefix);
 		string prefix=string(_prefix);
-		if(prefix=="P")
+		if (prefix == "G")
+		{
+			sscanf(words[1].data(), "%lf", &scale);
+
+		}
+		if (prefix == "P")
 		{
 			_branch=new branch();
 			sscanf(words[1].data(),"%d",&N);
@@ -195,6 +200,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		if(prefix=="R")
 		{
 			sscanf(words[1].data(),"%lf",&R);
+			R *= scale;
 			if(R<minR)minR=R;
 			data.push_back(boost::make_tuple(R,_branch));
 		}
@@ -203,7 +209,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 			sscanf(words[1].data(),"%lf",&x);
 			sscanf(words[2].data(),"%lf",&y);
 			sscanf(words[3].data(),"%lf",&z);
-			_branch->push_back(Point(x,y,z));
+			_branch->push_back(Point(x*scale,y*scale,z*scale));
 		}
 		if(prefix=="S")
 		{
@@ -214,6 +220,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		if(prefix=="T")
 		{
 			sscanf(words[1].data(),"%lf",&T);
+			T *= scale;
 			if(T<minT)minT=T;
 			mData.push_back(boost::make_tuple(T,_mesh));
 		}
@@ -222,7 +229,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 			sscanf(words[1].data(),"%lf",&x);
 			sscanf(words[2].data(),"%lf",&y);
 			sscanf(words[3].data(),"%lf",&z);
-			_mesh->Vertices.push_back(Point(x,y,z));
+			_mesh->Vertices.push_back(Point(x*scale,y*scale,z*scale));
 		}
 		if(prefix=="F"){
 			int A,B,C;
@@ -230,8 +237,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 			sscanf(words[2].data(),"%d",&B);
 			sscanf(words[3].data(),"%d",&C);
 			_mesh->Faces.push_back(MeshFace(A,B,C));
-		}
-		
+		}	
 	}
 	ifs.close();
 	return boost::make_tuple(minR,minT);
@@ -730,8 +736,8 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 {	
 	__int64 numInterior=0;
 	__int64 next=0;
-	double tt[10] = { 0.48,0.465,0.45,0.425,0.405,-0.405,-0.425,-0.45,-0.465,-0.48};
-	double uv_ser[12] = { 0.01, 0.06, 0.12, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.88, 0.94, 0.99 };
+	double tt[10] = { 0.45,0.445,0.43,0.42,0.405,-0.405,-0.42,-0.43,-0.445,-0.45};
+	double uv_ser[12] = { 0.05, 0.08, 0.12, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.88, 0.92, 0.95 };
 	for (auto tMS : mesh_infos)
 	{
 		double t;
@@ -1223,6 +1229,59 @@ int main(int argc, char *argv[])
 		}
 		if (cells[N] >= 1)bool_list[N] = true;
 	}
+	std::cout << "push and pop" << endl;
+	int TT = 0;
+	for (int i = 0; i < 4;i++)
+	{
+		int num = 0;
+		N = 0;
+		for (Delaunay::Finite_cells_iterator itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++, N++)
+		{
+			if (bool_list[N] == false)
+			{
+				int count = 0;
+				for (int i = 0; i<4; i++)
+				{
+					Delaunay::Cell_handle _neighbor = itr->neighbor(i);
+					//std::map<Delaunay::Cell_handle, int>::iterator it_N = index.find(_neighbor);
+					if (_neighbor->info()!=-1)
+					{
+						if (bool_list[_neighbor->info()])count++;
+					}
+				}
+				if (count>2){
+					bool_list[N] = true;
+					//everything++;
+					num++;
+				}
+			}
+			if(bool_list[N]==true)
+			{
+				int count=0;
+				for(int i=0;i<4;i++)
+				{
+					Delaunay::Cell_handle _neighbor=itr->neighbor(i);
+					if (_neighbor->info() != -1)
+					{
+						if (!bool_list[_neighbor->info()])count++;
+					}
+				}
+				if(count>2){
+				bool_list[N]=false;
+				//everything++;
+				num++;
+				}
+			}
+		}
+
+		TT++;
+		std::cout << "refine:" << TT << ", corrected:" << num << endl;
+		if (num == 0)break;
+	}
+
+
+	//}
+
 	__int64 NN;
 	std::cout << "start refine" << endl;
 	std::cout << "erase bubbles" << endl;

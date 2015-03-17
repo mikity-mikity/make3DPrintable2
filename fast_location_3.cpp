@@ -1686,19 +1686,46 @@ int main(int argc, char *argv[])
 	}
 	ofs3.close();*/
 	//std::cout << "finished writing facets." << endl;
-	MeshStructure *MS = MeshStructure::CreateFrom_already_oriented(&mesh, facet_list);
+	Poly P = MeshStructure::CreateFrom_already_oriented(&mesh, facet_list);
 	std::cout << "release triangulation." << endl;
 	T.clear();
-	delete MS;
 	string filename1 = NAME + ".stl";    //vertices
 	ofstream ofs(filename1);
 	std::cout << "start writing file" << "[" << filename1 << "]" << endl;
 	//export stl
 	ofs << "solid " << NAME << endl;
 	N = 0;
-	NN = mesh.Faces.size() / 20;
+	NN = P.size_of_facets() / 20;
 	if (NN == 0)NN = 1;
-	for (auto face : mesh.Faces)
+	typedef Poly::Facet_iterator                   Facet_iterator;
+	typedef Poly::Halfedge_around_facet_circulator Halfedge_facet_circulator;
+
+	//std::copy(P.points_begin(), P.points_end(),
+	//	std::ostream_iterator<Point_3>(std::cout, "\n"));
+	
+	for (Facet_iterator i = P.facets_begin(); i != P.facets_end(); ++i) {
+		Halfedge_facet_circulator j = i->facet_begin();
+		// Facets in polyhedral surfaces are at least triangles.
+		auto PA = j->vertex()->point();
+		++j;
+		auto PB = j->vertex()->point();
+		++j;
+		auto PC = j->vertex()->point();
+		auto v12 = PB - PA;
+		auto v23 = PC - PB;
+		auto normal = CGAL::cross_product(v12, v23);
+		normal = normal / std::sqrt(normal.squared_length());
+		ofs << "facet normal " << normal.x() << " " << normal.y() << " " << normal.z() << endl;
+		ofs << "outer loop" << endl;
+		ofs << "vertex " << PA.x() << " " << PA.y() << " " << PA.z() << endl;
+		ofs << "vertex " << PB.x() << " " << PB.y() << " " << PB.z() << endl;
+		ofs << "vertex " << PC.x() << " " << PC.y() << " " << PC.z() << endl;
+		ofs << "endloop" << endl;
+		ofs << "endfacet" << endl;
+		N++;
+		if (((int)N / NN)*NN == N)std::cout << "*";
+
+	}	/*for (auto face : mesh.Faces)
 	{
 		__int64 A = face.A;
 		__int64 B = face.B;
@@ -1715,7 +1742,7 @@ int main(int argc, char *argv[])
 		ofs << "endfacet" << endl;
 		N++;
 		if (((int)N / NN)*NN == N)std::cout << "*";
-	}
+	}*/
 	ofs << "endsolid " << NAME << endl;
 	std::cout<<endl;
 	ofs.close();

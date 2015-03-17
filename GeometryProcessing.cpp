@@ -9,11 +9,8 @@ namespace GeometryProcessing
 	template<class HDS> void Builder<HDS>::operator()(HDS& hds){
 		//Mesh* mesh;
 		//MeshStructure *MS;
-		std::cout << "hi!" << endl;
 		CGAL::Polyhedron_incremental_builder_3<HDS> B(hds, true);
-		std::cout << "hi!" << endl;
 		B.begin_surface(mesh->Vertices.size(), mesh->Faces.size(), MS->halfedges.size());
-		std::cout << "hi!" << endl;
 		typedef typename HDS::Vertex Vertex;
 		typedef typename Vertex::Point PPP;
 		for (auto v : mesh->Vertices)
@@ -227,7 +224,7 @@ namespace GeometryProcessing
 		}
 		delete(__orientation);
 	}
-	void MeshStructure::Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
+	Poly MeshStructure::Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
 	{
 		__int64 _nVertices = (int)val->Vertices.size();
 		__int64 _nFaces = (int)val->Faces.size();
@@ -591,7 +588,27 @@ namespace GeometryProcessing
 		P.delegate(builder);
 		std::cout << "P.is_valid=" << (P.is_valid() ? "true" : "false") << endl;
 		std::cout << "P.is_closed=" << (P.is_closed() ? "true" : "false") << endl;
-		std::cin.get();
+		// This is a stop predicate (defines when the algorithm terminates).
+		// In this example, the simplification stops when the number of undirected edges
+		// left in the surface mesh drops below the specified number (1000)
+		SMS::Count_stop_predicate<Poly> stop(P.size_of_halfedges()/2.0/10.0);
+	
+		// This the actual call to the simplification algorithm.
+		// The surface mesh and stop conditions are mandatory arguments.
+		// The index maps are needed because the vertices and edges
+		// of this surface mesh lack an "id()" field.
+		int r = SMS::edge_collapse
+			(P
+			, stop
+			, CGAL::vertex_index_map(get(CGAL::vertex_external_index, P))
+			.halfedge_index_map(get(CGAL::halfedge_external_index, P))
+			.get_cost(SMS::Edge_length_cost <Poly>())
+			.get_placement(SMS::Midpoint_placement<Poly>())
+			);
+
+		std::cout << "\nFinished...\n" << r << " edges removed.\n"
+			<< (P.size_of_halfedges() / 2) << " final edges.\n";
+		return P;
 	}
 	void MeshStructure::halfEdgeAdd(face *f)
 	{
@@ -725,11 +742,13 @@ namespace GeometryProcessing
 		ret->Construct(val);
 		return ret;
 	}
-	MeshStructure* MeshStructure::CreateFrom_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
+	Poly MeshStructure::CreateFrom_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
 	{
 		MeshStructure* ret = new MeshStructure();
-		ret->Construct_already_oriented(val, facet_list);
-		return ret;
+		Poly P=ret->Construct_already_oriented(val, facet_list);
+		delete ret;
+
+		return P;
 	}
 	void MeshStructure::Clear()
 	{

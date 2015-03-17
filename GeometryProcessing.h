@@ -10,6 +10,16 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_3.h>
 #include<CGAL/Polyhedron_incremental_builder_3.h>
+#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
+
+// Simplification function
+#include <CGAL/Surface_mesh_simplification/edge_collapse.h>
+
+// Stop-condition policy
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Edge_length_cost.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
+
 #include <vector>
 #include<Eigen/Dense>
 #include<Eigen/Sparse>
@@ -17,6 +27,8 @@
 #include"halfedge.h"
 #include"vertex.h"
 #include<iostream>
+
+namespace SMS = CGAL::Surface_mesh_simplification;
 
 typedef CGAL::Simple_cartesian<long double> Kernel;
 typedef CGAL::Polyhedron_3<Kernel> Poly;
@@ -117,13 +129,13 @@ namespace GeometryProcessing
 	private:
 		MeshStructure();
 		void Construct(Mesh *val);
-		void Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
+		Poly Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
 		void halfEdgeAdd(face *f);
 		void faceTableAdd(int i, int j, face* f);
 		void faceTableAdd(face* f);
 	public:
 		static MeshStructure* CreateFrom(Mesh *val);
-		static MeshStructure* CreateFrom_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
+		static Poly CreateFrom_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
 		void Clear();
 		~MeshStructure();
     };

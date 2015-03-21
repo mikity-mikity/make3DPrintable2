@@ -919,6 +919,7 @@ namespace GeometryProcessing
 			}
 			if (go.size() >= 2)
 			{
+				std::cout << "(" << i << "-" << j << ")" << endl;
 				__int64 SS = go.size();
 				for (__int64 k = 0; k < SS; k++)
 				{
@@ -930,17 +931,21 @@ namespace GeometryProcessing
 					auto ph = go[k];
 					auto cell1 = facet_list[ph->owner->N].first;
 					auto D1= facet_list[ph->owner->N].second;
-					auto V1 = cell1->vertex(D1)->point() - val->Vertices[i];
+					Point mid((val->Vertices[i].x() + val->Vertices[j].x()) / 2., (val->Vertices[i].y() + val->Vertices[j].y()) / 2., (val->Vertices[i].z() + val->Vertices[j].z()) / 2.);
+					auto V1 = cell1->vertex(D1)->point() - mid;
 					auto cell2 = facet_list[ph->pair->owner->N].first;
 					auto D2 = facet_list[ph->pair->owner->N].second;
-					auto V2 = cell2->vertex(D2)->point() - val->Vertices[i];
+					auto V2 = cell2->vertex(D2)->point() - mid;
 					VV = VV + V1+V2;
-					VV = VV / 2.0/1000.;
+					VV = VV / 2.0/100.;
 					vector<halfedge*> pool;
 					val->Vertices.push_back(Point((P.x() + Q.x()) / 2. + VV.x(), (P.y() + Q.y()) / 2. + VV.y(), (P.z() + Q.z()) / 2. + VV.z()));
 					__int64 l = _nVertices;
+					if (i == 6988 && j == 272758)
+					{
+						std::cout << "(" << i << "-" << l << "-" << j << ")" << endl;
+					}
 					halfedge* a0, *a1, *b0, *b1;
-					std::cout << "yayA!" << endl;
 					auto newHF = new halfedge(newVert);
 					auto newHHF = new halfedge(newVert);
 					pool.push_back(newHF);
@@ -975,29 +980,40 @@ namespace GeometryProcessing
 					a->owner = ph->owner;
 					b->owner = ph->owner;
 					c->owner = ph->owner;
+					auto f = new face(_nFaces, ph->owner->corner[0], ph->owner->corner[1], ph->owner->corner[2]);
+
 					for (int ii = 0; ii < 3; ii++)
 					{
 						if (ph->owner->corner[ii] == j){
-							ph->owner->corner[ii] = k;
+							ph->owner->corner[ii] = l;
 						}
 					}
-					auto f = new face(_nFaces, ph->owner->corner[0], ph->owner->corner[1], ph->owner->corner[2]);
+					val->Faces[ph->owner->N].A = ph->owner->corner[0];
+					val->Faces[ph->owner->N].B = ph->owner->corner[1];
+					val->Faces[ph->owner->N].C = ph->owner->corner[2];
+					if (i == 6988 && j == 272758)
+					{
+						std::cout << "F:" << val->Faces[ph->owner->N].A << "-" << val->Faces[ph->owner->N].B << "-" << val->Faces[ph->owner->N].C << endl;
+					}
 					A->owner = f;
 					B->owner = f;
 					C->owner = f;
 					for (int ii = 0; ii < 3; ii++)
 					{
 						if (f->corner[ii] == i){
-							f->corner[ii] = k;
+							f->corner[ii] = l;
 						}
 					}
 					faces.push_back(f);
-					val->Faces.push_back(MeshFace(f->corner[0], f->corner[1], f->corner[2], val->Faces[ph->owner->N].N));
 					facet_list.push_back(facet_list[ph->owner->N]);
+					val->Faces.push_back(MeshFace(f->corner[0], f->corner[1], f->corner[2], val->Faces[ph->owner->N].N));
+					if (i == 6988 && j == 272758)
+					{
+						std::cout << "F:" << val->Faces[f->N].A << "-" << val->Faces[f->N].B << "-" << val->Faces[f->N].C << endl;
+					}
 
 					_nFaces++;
 					ph = come[k];
-					std::cout << "yayAA!" << endl;
 					newHF = new halfedge(newVert);
 					newHHF = new halfedge(newVert);
 					pool.push_back(newHF);
@@ -1032,25 +1048,36 @@ namespace GeometryProcessing
 					a->owner = ph->owner;
 					b->owner = ph->owner;
 					c->owner = ph->owner;
+					f = new face(_nFaces, ph->owner->corner[0], ph->owner->corner[1], ph->owner->corner[2]);
 					for (int ii = 0; ii < 3; ii++)
 					{
 						if (ph->owner->corner[ii] == i){
-							ph->owner->corner[ii] = k;
+							ph->owner->corner[ii] = l;
 						}
 					}
-					f = new face(_nFaces, ph->owner->corner[0], ph->owner->corner[1], ph->owner->corner[2]);
+					val->Faces[ph->owner->N].A = ph->owner->corner[0];
+					val->Faces[ph->owner->N].B = ph->owner->corner[1];
+					val->Faces[ph->owner->N].C = ph->owner->corner[2];
+					if (i == 6988 && j == 272758)
+					{
+						std::cout << "F:" << val->Faces[ph->owner->N].A << "-" << val->Faces[ph->owner->N].B << "-" << val->Faces[ph->owner->N].C << endl;
+					}
 					A->owner = f;
 					B->owner = f;
 					C->owner = f;
 					for (int ii = 0; ii < 3; ii++)
 					{
 						if (f->corner[ii] == j){
-							f->corner[ii] = k;
+							f->corner[ii] = l;
 						}
 					}
 					faces.push_back(f);
 					facet_list.push_back(facet_list[ph->owner->N]);
 					val->Faces.push_back(MeshFace(f->corner[0], f->corner[1], f->corner[2], val->Faces[ph->owner->N].N));
+					if (i == 6988 && j == 272758)
+					{
+						std::cout << "F:" << val->Faces[f->N].A << "-" << val->Faces[f->N].B << "-" << val->Faces[f->N].C << endl;
+					}
 					_nFaces++;
 
 					vectorPool.push_back(pool);
@@ -1059,9 +1086,7 @@ namespace GeometryProcessing
 					b1->pair = a0;
 					a1->pair = b0;
 					b0->pair = a1;
-
 				}
-				_nVertices += SS;
 			}
 
 		}

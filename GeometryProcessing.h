@@ -129,7 +129,7 @@ namespace GeometryProcessing
 	private:
 		MeshStructure();
 		void Construct(Mesh *val);
-		Poly Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
+		void Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
 		void halfEdgeAdd(face *f);
 		void faceTableAdd(int i, int j, face* f);
 		void faceTableAdd(face* f);

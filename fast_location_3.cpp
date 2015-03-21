@@ -1231,7 +1231,7 @@ int main(int argc, char *argv[])
 	}
 	std::cout << "push and pop" << endl;
 	int TT = 0;
-	for (int i = 0; i < 4;i++)
+	for (int i = 0; i < 20; i++)
 	{
 		int num = 0;
 		N = 0;
@@ -1474,7 +1474,7 @@ int main(int argc, char *argv[])
 	parallel_for_each(cell_group.begin(), cell_group.end(), [&bool_list, &count, &survived](std::list<Cell_handle> itr)
 	{
 		bool flag = false;
-		if (itr.size() < 20)flag = true;
+		if (itr.size() < 200)flag = true;
 		if (!flag)survived++;
 		if (flag)
 		{
@@ -1663,23 +1663,33 @@ int main(int argc, char *argv[])
 			normal = -normal;
 			mesh.Faces.push_back(MeshFace(v[2]->info().num, v[1]->info().num, v[0]->info().num,normal));
 		}
-		__int64 T1 = 231938;
-		__int64 T2 = 231936;
+		
+		__int64 T1 = 129958;
+		__int64 T2 = 129959;
+		__int64 T3 = 2121924;
+		__int64 T4 = 2121925;
+
 		int cc = 0;
 		for (int i = 0; i < 3; i++)
 		{
 			if (v[i]->info().num == T1)cc++;
 			if (v[i]->info().num == T2)cc++;
+			if (v[i]->info().num == T3)cc++;
+			if (v[i]->info().num == T4)cc++;
 		}
-		if (cc == 2)
+		std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+
+		if (cc == 3)
 		{
-			std::cout << "V1:" << v[0]->info().num << ":" << v[0]->point().x() << "," << v[0]->point().y() << "," << v[0]->point().z() << endl;
+			std::cout << std::setprecision(10)<< "V1:" << v[0]->info().num << ":" << v[0]->point().x() << "," << v[0]->point().y() << "," << v[0]->point().z() << endl;
 			std::cout << "V2:" << v[1]->info().num << ":" << v[1]->point().x() << "," << v[1]->point().y() << "," << v[1]->point().z() << endl;
 			std::cout << "V3:" << v[2]->info().num << ":" << v[2]->point().x() << "," << v[2]->point().y() << "," << v[2]->point().z() << endl;
 			std::cout << "N:" << normal.x() << "," << normal.y() << "," << normal.z() << endl;
 			std::cout << "volume=" << CGAL::cross_product(v12, v23)*v14 << endl;
 		}
 	}
+	std::cout << "press enter to continue" << endl;
+	//std::cin.get();
 	/*for (auto f : mesh.Faces)
 	{
 		ofs3 << f.A << "," << f.B << "," << f.C << endl;
@@ -1725,7 +1735,8 @@ int main(int argc, char *argv[])
 		N++;
 		if (((int)N / NN)*NN == N)std::cout << "*";
 
-	}	/*for (auto face : mesh.Faces)
+	}
+	/*for (auto face : mesh.Faces)
 	{
 		__int64 A = face.A;
 		__int64 B = face.B;
@@ -1754,7 +1765,7 @@ int main(int argc, char *argv[])
 	
 	
 	std::cout << "Press Return To Exit...";
-	std::cin.get();
+	//std::cin.get();
 
 
 

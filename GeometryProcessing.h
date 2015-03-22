@@ -12,6 +12,12 @@
 #include<CGAL/Polyhedron_incremental_builder_3.h>
 #include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
 
+
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
+#include <CGAL/Unique_hash_map.h>
+#include <CGAL/Mesh_3/dihedral_angle_3.h>
+#include <CGAL/property_map.h>
+#
 // Simplification function
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 
@@ -35,6 +41,30 @@ typedef CGAL::Polyhedron_3<Kernel> Poly;
 typedef Poly::Point_3 PP;
 typedef Poly::HalfedgeDS HalfedgeDS;
 
+typedef boost::graph_traits<Poly>::vertex_descriptor vertex_descriptor;
+typedef boost::graph_traits<Poly>::halfedge_descriptor halfedge_descriptor;
+typedef boost::graph_traits<Poly>::edge_descriptor edge_descriptor;
+typedef boost::graph_traits<Poly>::edge_iterator edge_iterator;
+struct Constrained_edge_map : public boost::put_get_helper<bool,Constrained_edge_map>
+{
+  typedef boost::readable_property_map_tag      category;
+  typedef bool                                  value_type;
+  typedef bool                                  reference;
+  typedef edge_descriptor                       key_type;
+
+  Constrained_edge_map(const CGAL::Unique_hash_map<key_type,bool>& aConstraints)
+    : mConstraints(aConstraints)
+  {}
+
+  reference operator[](key_type const& e) const { return  is_constrained(e); }
+
+  bool is_constrained( key_type const& e ) const {
+    return mConstraints.is_defined(e);
+  }
+
+private:
+  const CGAL::Unique_hash_map<key_type,bool>& mConstraints;
+};
 struct col_int
 {
 	CGAL::Color col;
@@ -65,6 +95,10 @@ using namespace std;
 using namespace Eigen;
 namespace GeometryProcessing
 {
+	bool is_border(edge_descriptor e, const Poly& sm);
+
+	PP point(vertex_descriptor vd, const Poly& sm);
+
 
 	struct MeshFace
 	{

@@ -1034,6 +1034,8 @@ int main(int argc, char *argv[])
 	{
 		mesh_infos.push_back(computeNormal(MS));
 	}
+	int nPolyline = data.size();
+	int nMesh = mData.size();
 	std::vector<std::pair<Point, col_int>> exterior;
 	std::vector<eclipses*> eclipseTree;
 	generate_eclipseTree(data, eclipseTree);
@@ -1068,97 +1070,98 @@ int main(int argc, char *argv[])
 
 
 	//compute total number of interior points
-
-	__int64 size = computeInterior(data, eclipseTree, baseRes, [](info& myInfo, __int64& numInterior){
-		for (double ss = 0.5; ss < myInfo.DIV; ss++)
-		{
-			for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
+	if (nPolyline > 0)
+	{
+		__int64 size = computeInterior(data, eclipseTree, baseRes, [](info& myInfo, __int64& numInterior){
+			for (double ss = 0.5; ss < myInfo.DIV; ss++)
 			{
-				++numInterior;
-			}
-		}
-	}, 0);
-
-	std::cout << "interior.size():" << size << endl;
-
-	computeInterior(data, eclipseTree, baseRes, [&cells, &T](info& myInfo, __int64& numInterior){
-
-		Cell_handle c;
-
-		if (myInfo.itrC == myInfo.branch->begin())
-		{
-			Vector Z(0, 0, 1);
-			double t = myInfo.V*Z;
-			if (std::fabs(t) > 0.9)
-			{
-				Z = Vector(0, 1, 0);
-			}
-			myInfo.beforeX = CGAL::cross_product(myInfo.V, Z);
-			myInfo.beforeY = CGAL::cross_product(myInfo.V, myInfo.beforeX);
-			myInfo.beforeX = myInfo.beforeX / std::sqrt(myInfo.beforeX.squared_length());
-			myInfo.beforeY = myInfo.beforeY / std::sqrt(myInfo.beforeY.squared_length());
-		}
-		else
-		{
-			//project beforeX and beforeY to the plane at the node
-			double cx = -(myInfo.beforeX*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
-			double cy = -(myInfo.beforeY*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
-			Vector tmpX = myInfo.beforeX + cx*myInfo.V;
-			Vector tmpY = myInfo.beforeY + cy*myInfo.V;
-
-			//Compute plane	
-			Vector Z(0, 0, 1);
-			double t = myInfo.V*Z;
-			if (std::fabs(t) > 0.9)
-			{
-				Z = Vector(0, 1, 0);
-			}
-			Vector X = CGAL::cross_product(myInfo.V, Z);
-			Vector Y = CGAL::cross_product(myInfo.V, myInfo.beforeX);
-			Vector N = CGAL::cross_product(X, Y);
-			//project tmpX and tmpY to the plane conformed of X and Y
-			myInfo.beforeX = tmpX - (tmpX*N)*N;
-			myInfo.beforeY = CGAL::cross_product(myInfo.V, myInfo.beforeX);
-			myInfo.beforeX = myInfo.beforeX / std::sqrt(myInfo.beforeX.squared_length());
-			myInfo.beforeY = myInfo.beforeY / std::sqrt(myInfo.beforeY.squared_length());
-		}
-
-		for (double ss = 0.5; ss < myInfo.DIV; ss++)
-		{
-			double s = ((double)ss) / ((double)myInfo.DIV);
-			for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
-			{
-				Vector B = myInfo.beforeX*(*particle).x() + myInfo.beforeY*(*particle).y();
-				int li, lj;
-				Locate_type lt;
-
-				//Project N
-				double c1 = -(B*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
-				double c2 = -(B*(myInfo.itrD + 1)->Normal) / (myInfo.V*(myInfo.itrD + 1)->Normal);
-				Vector tmp1 = B + c1*myInfo.V;
-				Vector tmp2 = B + c2*myInfo.V;
-				Point D1 = (*myInfo.itrC) + tmp1;
-				Point D2 = (*(myInfo.itrC + 1)) + tmp2;
-				Point D(D2.x()*s + D1.x()*(1 - s), D2.y()*s + D1.y()*(1 - s), D2.z()*s + D1.z()*(1 - s));
-				if (myInfo.before == NULL)
-					c = T.locate(D, lt, li, lj);
-				else
-					c = T.locate(D, lt, li, lj, myInfo.before);
-
-
-				if (lt == Locate_type::CELL)
+				for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
 				{
-					__int64 d = c->info();
-					cells[d]++;
-					myInfo.before = c;
+					++numInterior;
 				}
-
-				++numInterior;
 			}
-		}
+		}, 0);
 
-	}, size);
+		std::cout << "interior.size():" << size << endl;
 
+		computeInterior(data, eclipseTree, baseRes, [&cells, &T](info& myInfo, __int64& numInterior){
+
+			Cell_handle c;
+
+			if (myInfo.itrC == myInfo.branch->begin())
+			{
+				Vector Z(0, 0, 1);
+				double t = myInfo.V*Z;
+				if (std::fabs(t) > 0.9)
+				{
+					Z = Vector(0, 1, 0);
+				}
+				myInfo.beforeX = CGAL::cross_product(myInfo.V, Z);
+				myInfo.beforeY = CGAL::cross_product(myInfo.V, myInfo.beforeX);
+				myInfo.beforeX = myInfo.beforeX / std::sqrt(myInfo.beforeX.squared_length());
+				myInfo.beforeY = myInfo.beforeY / std::sqrt(myInfo.beforeY.squared_length());
+			}
+			else
+			{
+				//project beforeX and beforeY to the plane at the node
+				double cx = -(myInfo.beforeX*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
+				double cy = -(myInfo.beforeY*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
+				Vector tmpX = myInfo.beforeX + cx*myInfo.V;
+				Vector tmpY = myInfo.beforeY + cy*myInfo.V;
+
+				//Compute plane	
+				Vector Z(0, 0, 1);
+				double t = myInfo.V*Z;
+				if (std::fabs(t) > 0.9)
+				{
+					Z = Vector(0, 1, 0);
+				}
+				Vector X = CGAL::cross_product(myInfo.V, Z);
+				Vector Y = CGAL::cross_product(myInfo.V, myInfo.beforeX);
+				Vector N = CGAL::cross_product(X, Y);
+				//project tmpX and tmpY to the plane conformed of X and Y
+				myInfo.beforeX = tmpX - (tmpX*N)*N;
+				myInfo.beforeY = CGAL::cross_product(myInfo.V, myInfo.beforeX);
+				myInfo.beforeX = myInfo.beforeX / std::sqrt(myInfo.beforeX.squared_length());
+				myInfo.beforeY = myInfo.beforeY / std::sqrt(myInfo.beforeY.squared_length());
+			}
+
+			for (double ss = 0.5; ss < myInfo.DIV; ss++)
+			{
+				double s = ((double)ss) / ((double)myInfo.DIV);
+				for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
+				{
+					Vector B = myInfo.beforeX*(*particle).x() + myInfo.beforeY*(*particle).y();
+					int li, lj;
+					Locate_type lt;
+
+					//Project N
+					double c1 = -(B*myInfo.itrD->Normal) / (myInfo.V*myInfo.itrD->Normal);
+					double c2 = -(B*(myInfo.itrD + 1)->Normal) / (myInfo.V*(myInfo.itrD + 1)->Normal);
+					Vector tmp1 = B + c1*myInfo.V;
+					Vector tmp2 = B + c2*myInfo.V;
+					Point D1 = (*myInfo.itrC) + tmp1;
+					Point D2 = (*(myInfo.itrC + 1)) + tmp2;
+					Point D(D2.x()*s + D1.x()*(1 - s), D2.y()*s + D1.y()*(1 - s), D2.z()*s + D1.z()*(1 - s));
+					if (myInfo.before == NULL)
+						c = T.locate(D, lt, li, lj);
+					else
+						c = T.locate(D, lt, li, lj, myInfo.before);
+
+
+					if (lt == Locate_type::CELL)
+					{
+						__int64 d = c->info();
+						cells[d]++;
+						myInfo.before = c;
+					}
+
+					++numInterior;
+				}
+			}
+
+		}, size);
+	}
 	for (vector<Rad_branch>::iterator itr = data.begin(); itr != data.end(); itr++)
 	{
 		Rad_branch a = *itr;
@@ -1172,28 +1175,30 @@ int main(int argc, char *argv[])
 	}
 	eclipseTree.clear();
 
-	__int64 size2 = computeInterior2(mesh_infos, baseRes, [](info2& myInfo, __int64& numInterior){
-		++numInterior;
-	}, 0);
-	std::cout << "interior2.size():" << size2 << endl;
-	computeInterior2(mesh_infos, baseRes, [&cells, &T](info2& myInfo, __int64& numInterior){
-		int li, lj;
-		Locate_type lt;
-		Cell_handle c;
-		if (myInfo.before == NULL)
-			c = T.locate(myInfo.p, lt, li, lj);
-		else
-			c = T.locate(myInfo.p, lt, li, lj, myInfo.before);
-		if (lt == Locate_type::CELL)
-		{
-			__int64 d = c->info();
-			cells[d]++;
-			myInfo.before = c;
-		}
+	if (nMesh > 0)
+	{
+		__int64 size2 = computeInterior2(mesh_infos, baseRes, [](info2& myInfo, __int64& numInterior){
+			++numInterior;
+		}, 0);
+		std::cout << "interior2.size():" << size2 << endl;
+		computeInterior2(mesh_infos, baseRes, [&cells, &T](info2& myInfo, __int64& numInterior){
+			int li, lj;
+			Locate_type lt;
+			Cell_handle c;
+			if (myInfo.before == NULL)
+				c = T.locate(myInfo.p, lt, li, lj);
+			else
+				c = T.locate(myInfo.p, lt, li, lj, myInfo.before);
+			if (lt == Locate_type::CELL)
+			{
+				__int64 d = c->info();
+				cells[d]++;
+				myInfo.before = c;
+			}
 
-		++numInterior;
-	}, size2);
-
+			++numInterior;
+		}, size2);
+	}
 	for (auto tMS : meshStructures)
 	{
 		double t;
@@ -1765,7 +1770,7 @@ int main(int argc, char *argv[])
 	
 	
 	std::cout << "Press Return To Exit...";
-	//std::cin.get();
+	std::cin.get();
 
 
 

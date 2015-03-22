@@ -1294,7 +1294,47 @@ namespace GeometryProcessing
 		// This is a stop predicate (defines when the algorithm terminates).
 		// In this example, the simplification stops when the number of undirected edges
 		// left in the surface mesh drops below the specified number (1000)
-		SMS::Count_stop_predicate<Poly> stop(P.size_of_halfedges() / 20);
+		CGAL::Unique_hash_map<edge_descriptor,bool> constraint_hmap(false);
+		  Constrained_edge_map constraints_map(constraint_hmap);
+		SMS::Constrained_placement<SMS::Midpoint_placement<Poly>,
+									Constrained_edge_map > placement(constraints_map);
+
+		// map used to check that constrained_edges and the points of its vertices
+		// are preserved at the end of the simplification
+		// Warning: the computation of the dihedral angle is only an approximation and can
+		//          be far from the real value and could influence the detection of sharp
+		//          edges after the simplification
+		std::map<edge_descriptor,std::pair<PP, PP> >constrained_edges;
+		std::size_t nb_sharp_edges=0;
+		edge_iterator eb,ee;
+		for(boost::tie(eb,ee) = CGAL::edges(P); eb != ee ; ++eb )
+		{
+			halfedge_descriptor hd = CGAL::halfedge(*eb,P);
+			if ( is_border(*eb,P) ){
+				std::cout << "border" << std::endl;
+				++nb_sharp_edges;
+				constraint_hmap[*eb]=true;
+				constrained_edges[*eb]=std::make_pair(point(source(hd,P),P),
+                                            point(target(hd,P),P));
+			}else{
+				double angle = CGAL::Mesh_3::dihedral_angle(point(target(opposite(hd,P),P),P),
+                                                  point(target(hd,P),P),
+                                                  point(target(next(hd,P),P),P),
+                                                  point(target(next(opposite(hd,P),P),P),P));
+				if ( CGAL::abs(angle)<100 ){
+					++nb_sharp_edges;
+					constraint_hmap[*eb]=true;
+					PP p = point(source(hd,P),P);
+					PP q = point(target(hd,P),P);
+					constrained_edges[*eb]=std::make_pair(p,q);
+					std::cout << "2 " << p << " "  << q << "\n";
+				}
+			}
+		}
+		std::cout << "# sharp edges = " << nb_sharp_edges << std::endl;
+
+
+  		SMS::Count_stop_predicate<Poly> stop(P.size_of_halfedges() / 20);
 
 		// This the actual call to the simplification algorithm.
 		// The surface mesh and stop conditions are mandatory arguments.
@@ -1305,12 +1345,14 @@ namespace GeometryProcessing
 			, stop
 			, CGAL::vertex_index_map(get(CGAL::vertex_external_index, P))
 			.halfedge_index_map(get(CGAL::halfedge_external_index, P))
-			.get_cost(SMS::Edge_length_cost <Poly>())
+			.edge_is_constrained_map(constraints_map)
 			.get_placement(SMS::Midpoint_placement<Poly>())
 			);
 
 		std::cout << "\nFinished...\n" << r << " edges removed.\n"
 			<< (P.size_of_halfedges() / 2) << " final edges.\n";
+		std::cout << "P.is_valid=" << (P.is_valid() ? "true" : "false") << endl;
+		std::cout << "P.is_closed=" << (P.is_closed() ? "true" : "false") << endl;
 
 		return P;
 	}
@@ -1362,5 +1404,14 @@ namespace GeometryProcessing
 	MeshStructure::~MeshStructure()
 	{
 		this->Clear();
+	}
+	bool is_border(edge_descriptor e, const Poly& sm)
+	{
+		return (CGAL::face(CGAL::halfedge(e, sm), sm) == boost::graph_traits<Poly>::null_face())
+			|| (CGAL::face(opposite(CGAL::halfedge(e, sm), sm), sm) == boost::graph_traits<Poly>::null_face());
+	}
+	PP point(vertex_descriptor vd, const Poly& sm)
+	{
+		return get(CGAL::vertex_point, sm, vd);
 	}
 }

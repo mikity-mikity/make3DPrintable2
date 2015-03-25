@@ -240,6 +240,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		}	
 	}
 	ifs.close();
+	std::cout << "file reading finished" << endl;
 	return boost::make_tuple(minR,minT);
 }
 void generate_eclipseTree(std::vector<Rad_branch> &data,std::vector<eclipses*> &eclipseTree)
@@ -1020,20 +1021,25 @@ int main(int argc, char *argv[])
 	double baseRes = std::min(minT / 4., minR * 2 * PI / 12.);
 	cout << "baseRes=" << baseRes << endl;
 	std::vector<boost::tuple<double, Mesh*, GeometryProcessing::MeshStructure*>> meshStructures;
-
+	std::cout << "A" << endl;
+	int dd = 0;
 	for (auto tM : mData)
 	{
 		double t;
 		Mesh *m;
 		boost::tie(t, m) = tM;
 		GeometryProcessing::MeshStructure *MS = GeometryProcessing::MeshStructure::CreateFrom(m);
+		std::cout << "M:"<<dd << endl;
 		meshStructures.push_back(boost::make_tuple(t, m, MS));
+		dd++;
 	}
+	std::cout << "B" << endl;
 	vector<boost::tuple<double, GeometryProcessing::MeshStructure*, std::map<vertex*, boost::tuple<Eigen::Vector3d, Eigen::Vector3d>>>> mesh_infos;
 	for (auto MS : meshStructures)
 	{
 		mesh_infos.push_back(computeNormal(MS));
 	}
+	std::cout << "C" << endl;
 	int nPolyline = data.size();
 	int nMesh = mData.size();
 	std::vector<std::pair<Point, col_int>> exterior;

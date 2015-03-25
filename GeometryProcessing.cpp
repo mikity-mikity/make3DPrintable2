@@ -53,10 +53,11 @@ namespace GeometryProcessing
 	{
 		int _nVertices = (int)val->Vertices.size();
 		int _nFaces = (int)val->Faces.size();
-
+		std::cout << "nVer:" << _nVertices << ",nFac:" << _nFaces << endl;
 		__orientation = new orient[_nFaces];
 		_faceTable = SparseMatrix<vector<face*>*>(_nVertices, _nVertices);
 		__halfedgeTable = SparseMatrix<halfedge*>(_nVertices, _nVertices);
+		std::cout << "created sparsematrices" << endl;
 		for (int i = 0; i < _nFaces; i++)
 		{
 			__orientation[i] = orient::unknown;
@@ -77,6 +78,7 @@ namespace GeometryProcessing
 		}
 		//Recursive
 		halfEdgeAdd(faces[0]);
+		std::cout << "halfedgeAdded" << endl;
 		//find pairs
 		for (auto h : halfedges)
 		{

@@ -68,7 +68,7 @@ namespace GeometryProcessing
 			auto _v = new vertex(i);
 			vertices.push_back(_v);
 		}
-
+		std::cout << "aaa" << endl;
 		for (int i = 0; i < _nFaces; i++)
 		{
 			auto f = val->Faces[i];
@@ -76,6 +76,7 @@ namespace GeometryProcessing
 			faces.push_back(_f);
 			faceTableAdd(_f);
 		}
+		std::cout << "bbb" << endl;
 		//Recursive
 		halfEdgeAdd(faces[0]);
 		std::cout << "halfedgeAdded" << endl;
@@ -1150,7 +1151,15 @@ namespace GeometryProcessing
 	}
 	void MeshStructure::halfEdgeAdd(face *f)
 	{
+		static int counter = 0;
+		std::cout << counter << endl;
+		counter++;
 		auto _o = orient::unknown;
+		int nNN = 15952;
+		if (counter >= nNN)
+		{
+			std::cout << "N:" << counter <<"-A"<< endl;
+		}
 		for (int i = 0; i < 3; i++)
 		{
 			__int64 I = f->corner[i];
@@ -1188,6 +1197,10 @@ namespace GeometryProcessing
 				}
 			}
 		}
+		if (counter >= nNN)
+		{
+			std::cout << "N:" << counter << "-B" << endl;
+		}
 		__orientation[f->N] = orient::unknown;
 		if (_o == orient::unknown)
 			__orientation[f->N] = orient::positive; else __orientation[f->N] = _o;
@@ -1220,6 +1233,10 @@ namespace GeometryProcessing
 			f->firsthalfedge = he1;
 		}
 
+		if (counter >= nNN)
+		{
+			std::cout << "N:" << counter << "-C" << endl;
+		}
 
 		//list up neighbors that are not oriented
 		for (int i = 0; i < 3; i++)

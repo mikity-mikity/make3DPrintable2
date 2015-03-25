@@ -742,7 +742,7 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 {	
 	__int64 numInterior=0;
 	__int64 next=0;
-	double tt[14] = { 0.49,0.48,0.46,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.46,-0.48,-0.49};
+	double tt[12] = { 0.48,0.46,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.46,-0.48};
 	double uv_ser[12] = { 0.05, 0.08, 0.12, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.88, 0.92, 0.95 };
 	for (auto tMS : mesh_infos)
 	{
@@ -750,7 +750,7 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 		GeometryProcessing::MeshStructure *MS;
 		std::map<vertex*,boost::tuple<Eigen::Vector3d,Eigen::Vector3d>> info;
 		boost::tie(t,MS,info)=tMS;
-		int TDIV=10;
+		int TDIV=12;
 		vector<boost::tuple<vector<face*>::iterator, vector<face*>::iterator, info2*, int>> tasks;
 		__int64 size= MS->faces.size();
 		int nTasks = 100;
@@ -920,7 +920,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		//double edge = 2 * std::sin(alpha)*Radius;
 		//double dx = edge / YDIV;
 		myInfo->particles.clear();
-		double tt[7] = { 0.97, 0.96,0.93,0.9,0.87,0.84,0.81 };
+		double tt[7] = { 0.97, 0.95,0.93,0.9,0.87,0.84,0.81 };
 		for (int i = 0; i < RDIV; i++)
 		{
 			double theta1 = 2.*PI*((double)i) / ((double)RDIV);

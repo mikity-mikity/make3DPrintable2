@@ -49,14 +49,39 @@ namespace GeometryProcessing
 	{
 		this->Clear();
 	}
+	void MeshStructure::getfaces(int I, int J, vector<face*> &faces)
+	{
+		faces.clear();
+		auto ff = _faceTable[I];
+		for(auto f : ff)
+		{
+			if (f.second == J) faces.push_back(f.first);
+		}
+	}
+	void MeshStructure::gethalfedges(int I, int J, vector<halfedge*> &lhalfedges)
+	{
+		lhalfedges.clear();
+		auto ff = __halfedgeTable[I];
+		for(auto f : ff)
+		{
+			if (f->next->P->N == J) lhalfedges.push_back(f);
+		}
+	}
 	void MeshStructure::Construct(Mesh *val)
 	{
 		int _nVertices = (int)val->Vertices.size();
 		int _nFaces = (int)val->Faces.size();
 
 		__orientation = new orient[_nFaces];
-		_faceTable = SparseMatrix<vector<face*>*>(_nVertices, _nVertices);
-		__halfedgeTable = SparseMatrix<halfedge*>(_nVertices, _nVertices);
+		_faceTable = new vector<std::pair<face*,__int64>>[_nVertices];
+		__halfedgeTable = new vector<halfedge*>[_nVertices];
+		//_faceTable = SparseMatrix<vector<face*>*>(_nVertices, _nVertices);
+		//__halfedgeTable = SparseMatrix<halfedge*>(_nVertices, _nVertices);
+		for (int i = 0; i < _nVertices; i++)
+		{
+			_faceTable[i].clear();// = new List<tuple>();
+			__halfedgeTable[i].clear();// = new List<halfedge>();
+		}
 		for (int i = 0; i < _nFaces; i++)
 		{
 			__orientation[i] = orient::unknown;
@@ -77,26 +102,37 @@ namespace GeometryProcessing
 		}
 		//Recursive
 		halfEdgeAdd(faces[0]);
+		while (!neighbors.empty())
+		{
+			halfEdgeAdd(neighbors);
+		}
+		vector<halfedge*> lhalfedges;
 		//find pairs
 		for (auto h : halfedges)
 		{
 			int i = h->P->N;
 			int j = h->next->P->N;
+			gethalfedges(i, j, lhalfedges);
+			if (lhalfedges.size() != 0) std::cout << "this should not be empty!" << endl;
+
 			//if (__halfedgeTable.coeff(i, j) != NULL) throw new ArgumentOutOfRangeException(";)");
-			__halfedgeTable.coeffRef(i, j) = h;
+			//__halfedgeTable.coeffRef(i, j) = h;
+			__halfedgeTable[i].push_back(h);
+
 		}
 		for (auto h : halfedges)
 		{
 			int i = h->P->N;
 			int j = h->next->P->N;
+			gethalfedges(j, i, lhalfedges);
 			//if boundary edge...
-			if (__halfedgeTable.coeff(j, i) == NULL)
+			if (lhalfedges.size() == 0)
 			{
 				h->pair = NULL;
 			}
 			else
 			{
-				h->pair = __halfedgeTable.coeffRef(j, i);
+				h->pair = lhalfedges[0];
 			}
 		}
 		//post process to find boundary vertices
@@ -222,7 +258,10 @@ namespace GeometryProcessing
 		{
 			if (v->hf_begin->pair->isBoundary()) outerVertices.push_back(v); else innerVertices.push_back(v);
 		}
-		delete(__orientation);
+		delete[](__orientation);
+		delete[](_faceTable);
+		delete[](__halfedgeTable);
+
 	}
 	void MeshStructure::Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list)
 	{
@@ -845,49 +884,166 @@ namespace GeometryProcessing
 		}
 		std::cout << error << "errors found" << endl;*/
 	}
-	void MeshStructure::halfEdgeAdd(face *f)
+	void  MeshStructure::halfEdgeAdd(vector<face *>f)
 	{
 		auto _o = orient::unknown;
+		vector<face*> faces;
+		neighbors.clear();
+		for (auto face : f)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				__int64 I = face->corner[i];
+				__int64 J = (i == 2) ? face->corner[0] : face->corner[i + 1];
+				getfaces(I, J, faces);
+				if (faces.size() == 2)
+				{
+					if (faces[0] == face)
+					{
+						if (__orientation[faces[1]->N] != orient::unknown)
+						{
+							_o = __orientation[faces[1]->N] == orient::positive ? orient::negative : orient::positive;
+						}
+					}
+					if (faces[1] == face)
+					{
+						if (__orientation[faces[0]->N] != orient::unknown)
+						{
+							_o = __orientation[faces[0]->N] == orient::positive ? orient::negative : orient::positive;
+						}
+					}
+				}
+				else
+				{
+					getfaces(J, I, faces);
+					if (faces.size() != 0)
+					{
+						if (__orientation[faces[0]->N] != orient::unknown)
+						{
+							_o = __orientation[faces[0]->N];
+						}
+					}
+				}
+			}
+
+			__orientation[face->N] = _o == orient::unknown ? orient::positive : _o;
+			//std::cout << face->N << endl;
+
+			//register a halfedge
+			if (__orientation[face->N] == orient::positive)
+			{
+				auto he1 = new halfedge(vertices[face->corner[0]]);
+				auto he2 = new halfedge(vertices[face->corner[1]]);
+				auto he3 = new halfedge(vertices[face->corner[2]]);
+				halfedges.push_back(he1);
+				halfedges.push_back(he2);
+				halfedges.push_back(he3);
+				he1->prev = he3; he1->next = he2; he1->owner = face;
+				he2->prev = he1; he2->next = he3; he2->owner = face;
+				he3->prev = he2; he3->next = he1; he3->owner = face;
+				face->firsthalfedge = he1;
+			}
+
+			if (__orientation[face->N] == orient::negative)
+			{
+				auto he1 = new halfedge(vertices[face->corner[2]]);
+				auto he2 = new halfedge(vertices[face->corner[1]]);
+				auto he3 = new halfedge(vertices[face->corner[0]]);
+				halfedges.push_back(he1);
+				halfedges.push_back(he2);
+				halfedges.push_back(he3);
+				he1->prev = he3; he1->next = he2; he1->owner = face;
+				he2->prev = he1; he2->next = he3; he2->owner = face;
+				he3->prev = he2; he3->next = he1; he3->owner = face;
+				face->firsthalfedge = he1;
+			}
+		}
+		for (auto face : f)
+		{
+			//list up neighbors that are not oriented
+			//list up neighbors that are not oriented
+			for (int i = 0; i < 3; i++)
+			{
+				int I = face->corner[i];
+				int J = (i == 2) ? face->corner[0] : face->corner[i + 1];
+				getfaces(I, J, faces);
+				if (faces.size() == 2)
+				{
+					if (faces[0] == face)
+					{
+						if (__orientation[faces[1]->N] == orient::unknown)
+						{
+							neighbors.push_back(faces[1]);// halfEdgeAdd(faces[1]);
+						}
+					}
+					if (faces[1] == face)
+					{
+						if (__orientation[faces[0]->N] == orient::unknown)
+						{
+							neighbors.push_back(faces[0]);// halfEdgeAdd(faces[0]);
+						}
+					}
+				}
+				else
+				{
+					getfaces(J, I, faces);
+					if (faces.size() != 0)
+					{
+						if (__orientation[faces[0]->N] == orient::unknown)
+						{
+							neighbors.push_back(faces[0]);// halfEdgeAdd(faces[0]);
+						}
+					}
+				}
+			}
+		}
+		std::sort(neighbors.begin(),neighbors.end());
+		neighbors.erase(unique(neighbors.begin(), neighbors.end()), neighbors.end());
+	}
+
+	void  MeshStructure::halfEdgeAdd(face *f)
+	{
+		static int counter = 0;
+		std::cout << counter << endl;
+		counter++;
+		auto _o = orient::unknown;
+		vector<face*> faces;
 		for (int i = 0; i < 3; i++)
 		{
 			__int64 I = f->corner[i];
-			__int64 J = 0;
-			if (i == 2) J = f->corner[0]; else J = f->corner[i + 1];
-			if (_faceTable.coeffRef(I, J)->size() == 2)
+			__int64 J = (i == 2) ? f->corner[0] : f->corner[i + 1];
+			getfaces(I, J, faces);
+			if (faces.size() == 2)
 			{
-				if (_faceTable.coeffRef(I, J)->at(0) == f)
+				if (faces[0] == f)
 				{
-					if (__orientation[_faceTable.coeffRef(I, J)->at(1)->N] != orient::unknown)
+					if (__orientation[faces[1]->N] != orient::unknown)
 					{
-						_o = orient::unknown;
-						if (__orientation[_faceTable.coeffRef(I, J)->at(1)->N] == orient::positive)
-							_o = orient::negative; else orient::positive;
+						_o = __orientation[faces[1]->N] == orient::positive ? orient::negative : orient::positive;
 					}
 				}
-				if (_faceTable.coeffRef(I, J)->at(1) == f)
+				if (faces[1] == f)
 				{
-					if (__orientation[_faceTable.coeffRef(I, J)->at(0)->N] != orient::unknown)
+					if (__orientation[faces[0]->N] != orient::unknown)
 					{
-						_o = orient::unknown;
-						if (__orientation[_faceTable.coeffRef(I, J)->at(0)->N] == orient::positive)
-							_o = orient::negative; else _o = orient::positive;
+						_o = __orientation[faces[0]->N] == orient::positive ? orient::negative : orient::positive;
 					}
 				}
 			}
 			else
 			{
-				if (_faceTable.coeff(J, I) != NULL)
+				getfaces(J, I, faces);
+				if (faces.size() != 0)
 				{
-					if (__orientation[_faceTable.coeffRef(J, I)->at(0)->N] != orient::unknown)
+					if (__orientation[faces[0]->N] != orient::unknown)
 					{
-						_o = __orientation[_faceTable.coeffRef(J, I)->at(0)->N];
+						_o = __orientation[faces[0]->N];
 					}
 				}
 			}
 		}
-		__orientation[f->N] = orient::unknown;
-		if (_o == orient::unknown)
-			__orientation[f->N] = orient::positive; else __orientation[f->N] = _o;
+
+		__orientation[f->N] = _o == orient::unknown ? orient::positive : _o;
 		//register a halfedge
 		if (__orientation[f->N] == orient::positive)
 		{
@@ -919,35 +1075,39 @@ namespace GeometryProcessing
 
 
 		//list up neighbors that are not oriented
+		//list up neighbors that are not oriented
+		neighbors.clear();
+
 		for (int i = 0; i < 3; i++)
 		{
-			__int64 I = f->corner[i];
-			__int64 J = 0;
-			if (i == 2) J = f->corner[0]; else J = f->corner[i + 1];
-			if (_faceTable.coeffRef(I, J)->size() == 2)
+			int I = f->corner[i];
+			int J = (i == 2) ? f->corner[0] : f->corner[i + 1];
+			getfaces(I, J, faces);
+			if (faces.size() == 2)
 			{
-				if (_faceTable.coeffRef(I, J)->at(0) == f)
+				if (faces[0] == f)
 				{
-					if (__orientation[_faceTable.coeffRef(I, J)->at(1)->N] == orient::unknown)
+					if (__orientation[faces[1]->N] == orient:: unknown)
 					{
-						halfEdgeAdd(_faceTable.coeffRef(I, J)->at(1));
+						neighbors.push_back(faces[1]);// halfEdgeAdd(faces[1]);
 					}
 				}
-				if (_faceTable.coeffRef(I, J)->at(1) == f)
+				if (faces[1] == f)
 				{
-					if (__orientation[_faceTable.coeffRef(I, J)->at(0)->N] == orient::unknown)
+					if (__orientation[faces[0]->N] == orient::unknown)
 					{
-						halfEdgeAdd(_faceTable.coeffRef(I, J)->at(0));
+						neighbors.push_back(faces[0]);// halfEdgeAdd(faces[0]);
 					}
 				}
 			}
 			else
 			{
-				if (_faceTable.coeff(J, I) != NULL)
+				getfaces(J, I, faces);
+				if (faces.size() != 0)
 				{
-					if (__orientation[_faceTable.coeffRef(J, I)->at(0)->N] == orient::unknown)
+					if (__orientation[faces[0]->N] == orient::unknown)
 					{
-						halfEdgeAdd(_faceTable.coeffRef(J, I)->at(0));
+						neighbors.push_back(faces[0]);// halfEdgeAdd(faces[0]);
 					}
 				}
 			}
@@ -955,11 +1115,13 @@ namespace GeometryProcessing
 	}
 	void MeshStructure::faceTableAdd(int i, int j, face* f)
 	{
-		if (_faceTable.coeff(i, j) == NULL)
+/*		if (_faceTable.coeff(i, j) == NULL)
 		{
 			_faceTable.coeffRef(i, j) = new vector<face*>();
 		}
-		_faceTable.coeffRef(i, j)->push_back(f);
+		_faceTable.coeffRef(i, j)->push_back(f);*/
+		_faceTable[i].push_back(std::make_pair(f, j));
+
 	}
 	void MeshStructure::faceTableAdd(face* f)
 	{
@@ -1079,6 +1241,7 @@ namespace GeometryProcessing
 				delete(hf);
 			}
 		}
+		/*
 		if (_faceTable.nonZeros() != 0)
 		{
 			for (int k = 0; k < _faceTable.outerSize(); ++k)
@@ -1094,6 +1257,7 @@ namespace GeometryProcessing
 		}
 		_faceTable.setZero();
 		__halfedgeTable.setZero();
+		*/
 		halfedges.clear();
 		innerVertices.clear();
 		outerVertices.clear();

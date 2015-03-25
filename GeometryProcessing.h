@@ -27,8 +27,8 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
 
 #include <vector>
-#include<Eigen/Dense>
-#include<Eigen/Sparse>
+//#include<Eigen/Dense>
+//#include<Eigen/Sparse>
 #include"face.h"
 #include"halfedge.h"
 #include"vertex.h"
@@ -134,27 +134,31 @@ namespace GeometryProcessing
 	};
 
 
-    class MeshStructure
-    {
+	class MeshStructure
+	{
 	private:
 		enum orient
-        {
-            unknown, positive, negative
-        };
+		{
+			unknown, positive, negative
+		};
 
-        //to get boundary chain
-        //boundaryStart->hf->next->P->hf->next->P->....
+		//to get boundary chain
+		//boundaryStart->hf->next->P->hf->next->P->....
 	public:
-        vector<halfedge*> boundaryStart;
-        vector<vertex*> vertices;
-        vector<face*> faces;
-        vector<halfedge*> halfedges;
-        vector<vertex*> innerVertices;
-        vector<vertex*> outerVertices;  
+		vector<halfedge*> boundaryStart;
+		vector<vertex*> vertices;
+		vector<face*> faces;
+		vector<halfedge*> halfedges;
+		vector<vertex*> innerVertices;
+		vector<vertex*> outerVertices;
 	private:
 		//halfedge** __halfedgeTable;
-		Eigen::SparseMatrix<halfedge*> __halfedgeTable;
-		Eigen::SparseMatrix<vector<face*>*> _faceTable;
+		//Eigen::SparseMatrix<halfedge*> __halfedgeTable;
+		//Eigen::SparseMatrix<vector<face*>*> _faceTable;
+		vector<halfedge*> *__halfedgeTable;
+		vector<std::pair<face*, __int64>> *_faceTable;
+		vector<face*> neighbors;
+
         orient* __orientation;
 	public:
 		vector<halfedge*> edges();
@@ -162,11 +166,14 @@ namespace GeometryProcessing
 		__int64 nFaces();
 	private:
 		MeshStructure();
+		void MeshStructure::getfaces(int I, int J, vector<face*> &faces);
+		void MeshStructure::gethalfedges(int I, int J, vector<halfedge*> &lhalfedges);
 		void Construct(Mesh *val);
 		void Construct_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);
 		void halfEdgeAdd(face *f);
 		void faceTableAdd(int i, int j, face* f);
 		void faceTableAdd(face* f);
+		void MeshStructure::halfEdgeAdd(vector<face *>f);
 	public:
 		static MeshStructure* CreateFrom(Mesh *val);
 		static Poly CreateFrom_already_oriented(Mesh *val, vector<Delaunay::Facet> facet_list);

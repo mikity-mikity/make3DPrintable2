@@ -1,7 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="C:\Users\Masaaki\Documents\GitHub\sprout\fast_location_3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="face.cpp">
@@ -11,9 +14,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="halfedge.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,6 +26,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="vertex.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="face.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -33,9 +36,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="halfedge.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vertex.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

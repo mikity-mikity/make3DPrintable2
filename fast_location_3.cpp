@@ -240,7 +240,6 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		}	
 	}
 	ifs.close();
-	std::cout << "file reading finished" << endl;
 	return boost::make_tuple(minR,minT);
 }
 void generate_eclipseTree(std::vector<Rad_branch> &data,std::vector<eclipses*> &eclipseTree)
@@ -416,7 +415,10 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 	}
 	for(auto f:MS->faces)
 	{
-		Eigen::Vector3d P1,P2,P3,N1,N2,N3,P1out,P1in,P2out,P2in,P3out,P3in,_P1,_P2,_P3; //Position,Normal
+		bool b1 = f->firsthalfedge->isBoundary();
+		bool b2 = f->firsthalfedge->next->isBoundary();
+		bool b3 = f->firsthalfedge->next->next->isBoundary();
+		Eigen::Vector3d P1, P2, P3, N1, N2, N3, P1out, P1in, P2out, P2in, P3out, P3in, _P1, _P2, _P3; //Position,Normal
 		boost::tie(P1,N1)=info.find(f->firsthalfedge->P)->second;
 		boost::tie(P2,N2)=info.find(f->firsthalfedge->next->P)->second;
 		boost::tie(P3,N3)=info.find(f->firsthalfedge->next->next->P)->second;
@@ -468,6 +470,9 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 					exterior.push_back(std::make_pair(Point(p.x(), p.y(), p.z()), col_int(col, -1)));
 				}
 			}
+		}
+		if (b1){
+
 		}
 	}
 	for (int i = 0; i < MS->boundaryStart.size(); i++)
@@ -737,7 +742,7 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 {	
 	__int64 numInterior=0;
 	__int64 next=0;
-	double tt[10] = { 0.45,0.445,0.43,0.42,0.405,-0.405,-0.42,-0.43,-0.445,-0.45};
+	double tt[14] = { 0.49,0.48,0.46,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.46,-0.48,-0.49};
 	double uv_ser[12] = { 0.05, 0.08, 0.12, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.88, 0.92, 0.95 };
 	for (auto tMS : mesh_infos)
 	{
@@ -915,12 +920,12 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		//double edge = 2 * std::sin(alpha)*Radius;
 		//double dx = edge / YDIV;
 		myInfo->particles.clear();
-		double tt[5] = { 0.98, 0.93,0.9 ,0.87,0.81 };
+		double tt[7] = { 0.97, 0.96,0.93,0.9,0.87,0.84,0.81 };
 		for (int i = 0; i < RDIV; i++)
 		{
 			double theta1 = 2.*PI*((double)i) / ((double)RDIV);
 			double theta2 = 2.*PI*((double)i+1) / ((double)RDIV);
-			for (int k = 0; k < 5; k++)
+			for (int k = 0; k < 7; k++)
 			{
 				Point point1(tt[k] * R2*std::cos(theta1), R2*std::sin(theta1), 0);
 				Point point2(tt[k] * R2*std::cos(theta2), R2*std::sin(theta2), 0);
@@ -1021,25 +1026,20 @@ int main(int argc, char *argv[])
 	double baseRes = std::min(minT / 4., minR * 2 * PI / 12.);
 	cout << "baseRes=" << baseRes << endl;
 	std::vector<boost::tuple<double, Mesh*, GeometryProcessing::MeshStructure*>> meshStructures;
-	std::cout << "A" << endl;
-	int dd = 0;
+
 	for (auto tM : mData)
 	{
 		double t;
 		Mesh *m;
 		boost::tie(t, m) = tM;
 		GeometryProcessing::MeshStructure *MS = GeometryProcessing::MeshStructure::CreateFrom(m);
-		std::cout << "M:"<<dd << endl;
 		meshStructures.push_back(boost::make_tuple(t, m, MS));
-		dd++;
 	}
-	std::cout << "B" << endl;
 	vector<boost::tuple<double, GeometryProcessing::MeshStructure*, std::map<vertex*, boost::tuple<Eigen::Vector3d, Eigen::Vector3d>>>> mesh_infos;
 	for (auto MS : meshStructures)
 	{
 		mesh_infos.push_back(computeNormal(MS));
 	}
-	std::cout << "C" << endl;
 	int nPolyline = data.size();
 	int nMesh = mData.size();
 	std::vector<std::pair<Point, col_int>> exterior;
@@ -1266,7 +1266,7 @@ int main(int argc, char *argv[])
 					num++;
 				}
 			}
-			if(bool_list[N]==true)
+			/*if(bool_list[N]==true)
 			{
 				int count=0;
 				for(int i=0;i<4;i++)
@@ -1282,7 +1282,7 @@ int main(int argc, char *argv[])
 				//everything++;
 				num++;
 				}
-			}
+			}*/
 		}
 
 		TT++;

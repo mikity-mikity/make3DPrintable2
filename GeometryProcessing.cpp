@@ -53,11 +53,10 @@ namespace GeometryProcessing
 	{
 		int _nVertices = (int)val->Vertices.size();
 		int _nFaces = (int)val->Faces.size();
-		std::cout << "nVer:" << _nVertices << ",nFac:" << _nFaces << endl;
+
 		__orientation = new orient[_nFaces];
 		_faceTable = SparseMatrix<vector<face*>*>(_nVertices, _nVertices);
 		__halfedgeTable = SparseMatrix<halfedge*>(_nVertices, _nVertices);
-		std::cout << "created sparsematrices" << endl;
 		for (int i = 0; i < _nFaces; i++)
 		{
 			__orientation[i] = orient::unknown;
@@ -68,7 +67,7 @@ namespace GeometryProcessing
 			auto _v = new vertex(i);
 			vertices.push_back(_v);
 		}
-		std::cout << "aaa" << endl;
+
 		for (int i = 0; i < _nFaces; i++)
 		{
 			auto f = val->Faces[i];
@@ -76,10 +75,8 @@ namespace GeometryProcessing
 			faces.push_back(_f);
 			faceTableAdd(_f);
 		}
-		std::cout << "bbb" << endl;
 		//Recursive
 		halfEdgeAdd(faces[0]);
-		std::cout << "halfedgeAdded" << endl;
 		//find pairs
 		for (auto h : halfedges)
 		{
@@ -463,311 +460,10 @@ namespace GeometryProcessing
 		}
 		std::cout << "count1:" << count1 << "/" << "count2:" << count2 << "/" << "count3:" << count3 << endl;
 		int __nVertices = _nVertices;
-		/*vector<std::pair<__int64, __int64>> irregulars;
-		__int64 test = 730843;
-		__int64 test2 = 2443708;
-		for (int i = 0; i < __nVertices; i++)
-		{
-			auto pool = vectorPool[i];
-			vector<__int64> ttt;
-			for (auto p : pool)
-			{
-				ttt.push_back(p->next->P->N);
-			}
-			std::sort(ttt.begin(), ttt.end());
-			if (i == test || i == test2){
-				std::cout << "V:" << i<<":";
-				for (auto tttt : ttt)
-				{
-					std::cout << tttt << ",";
-				}
-				std::cout << endl;
-			}
-			//auto sss = std::unique(ttt.begin(), ttt.end());
-			vector<__int64> newTTT;
-			for (int ii = 0; ii < ttt.size()-1; ii++)
-			{
-				if (i == test || i == test2){
-					std::cout << ttt[ii] << "-" << ttt[ii + 1] << "   ";
-				}
-				if (ttt[ii] == ttt[ii + 1])
-				{
-					if (i == test || i == test2){
-						std::cout << "Hi!";
-					}
-					newTTT.push_back(ttt[ii]);
-					int tmp = ttt[ii];
-					while (ttt[ii] == tmp)ii++;
-				}
-			}
-			if (i == test || i == test2){
-				std::cout << "V:" << i<<":";
-				for (auto tttt : newTTT)
-				{
-					std::cout << tttt << ",";
-				}
-				std::cout << endl;
-			}
-			bool intersect = !newTTT.empty();
-			if (intersect)
-			{
-				auto v = vertices[i];
-				vector<vector<halfedge*>>stars;
-				do
-				{
-					auto h = pool[0];
-					vector<halfedge*>star;
-					do{
-						star.push_back(h);
-						pool.erase(std::find(pool.begin(), pool.end(), h));
-						if (h->isBoundary()) break;
-						h = h->prev->pair;
-					} while (h != star[0]);
-					stars.push_back(star);
-				} while (!pool.empty());
-				if (i == test || i == test2){
-					std::cout << "V:" << i<<","<<stars.size()<<endl;
-				}
-
-				if (stars.size() == 1)
-				{
-					for (auto itr = newTTT.begin(); itr != newTTT.end(); itr++)
-					{
-						auto ssss = *itr;
-						//if (ssss < i)continue;
-						auto v = vertices[ssss];
-						auto pool2 = vectorPool[ssss];
-						vector<vector<halfedge*>>stars2;
-						do
-						{
-							auto h = pool2[0];
-							vector<halfedge*>star2;
-							do{
-								star2.push_back(h);
-								pool2.erase(std::find(pool2.begin(), pool2.end(), h));
-								if (h->isBoundary()) break;
-								h = h->prev->pair;
-							} while (h != star2[0]);
-							stars2.push_back(star2);
-						} while (!pool2.empty());
-						if (i == test || i == test2){
-							std::cout << "V:" << i << "," << ssss << "," << stars2.size() << endl;
-						}
-							
-						if (stars2.size() == 1&&i<ssss||stars2.size()==2)
-						{
-							//std::cout << "multiple:";
-							//for (auto itr = newTTT.begin(); itr != newTTT.end(); itr++)
-							//{
-							//	std::cout << *itr<<",";
-							//}
-							//std::cout << endl;
-							irregulars.push_back(std::make_pair(i, ssss));
-							std::cout << "irregular:(" << i << "-" << ssss << ")" << endl;
-							//switch
-							vector<halfedge*> go;
-							vector<halfedge*> come;
-							pool = vectorPool[i];
-							pool2 = vectorPool[ssss];
-							for (auto p : pool){
-								if (p->P->N == i&&p->next->P->N == ssss)go.push_back(p);
-								//std::cout << p->next->P->N<<",";
-							}
-							//std::cout << endl;
-							for (auto p : pool2){
-								if (p->P->N == ssss&&p->next->P->N == i)come.push_back(p);
-							}
-							if (go.size() != 2 || come.size() != 2)
-							{
-								std::cout << "error!" << endl;
-								std::cout << "go.size()=" << go.size() << endl;
-								std::cout << "come.size()=" << come.size() << endl;
-							}
-							else{
-								if (go[0]->pair == come[0]){
-									go[0]->pair = come[1];
-									come[1]->pair = go[0];
-									go[1]->pair = come[0];
-									come[0]->pair = go[1];
-								}
-								else{
-									go[0]->pair = come[0];
-									come[0]->pair = go[0];
-									go[1]->pair = come[1];
-									come[1]->pair = go[1];
-								}
-							}
-							
-						}
-					}
-				}
-			}
-		}*/
+		
 		//std::cin.get();
 
-		/*
-		__nVertices = _nVertices;
-		std::cout <<"begin"<< _nVertices << endl;
-		__int64 __nFaces = _nFaces;
-		for (auto irr : irregulars)
-		{
-			__int64 i, j;
-			boost::tie(i, j) = irr;
-			vertices.push_back(new vertex(_nVertices));
-			auto newVert = vertices.back();
-			auto P = val->Vertices[i];
-			auto Q = val->Vertices[j];
-			val->Vertices.push_back(Point((P.x() + Q.x()) / 2., (P.y() + Q.y()) / 2., (P.z() + Q.z()) / 2.));
-			vector<halfedge*> pool;
-			__int64 k = _nVertices;
-			std::cout << "yayB!" << endl;
-			halfedge* a0, *a1, *b0, *b1;
-			for (auto ph : vectorPool[i])
-			{
-				if (ph->next->P->N == j)
-				{
-					std::cout << "yayA!" << endl;
-					auto newHF = new halfedge(newVert);
-					auto newHHF = new halfedge(newVert);
-					pool.push_back(newHF);
-					pool.push_back(newHHF);
-					auto newOHHF = new halfedge(ph->prev->P);
-					vectorPool[newOHHF->P->N].push_back(newOHHF);
-					halfedges.push_back(newHF);
-					halfedges.push_back(newHHF);
-					halfedges.push_back(newOHHF);
-					auto a = ph->prev;
-					auto b = ph;
-					auto c = newHHF;
-					auto A = newOHHF;
-					auto B = newHF;
-					auto C = ph->next;
-					a0 = b;
-					a1 = B;
-					a->next = b;
-					b->next = c;
-					c->next = a;
-					A->next = B;
-					B->next = C;
-					C->next = A;
-					a->prev = c;
-					b->prev = a;
-					c->prev = b;
-					A->prev = C;
-					B->prev = A;
-					C->prev = B;
-					c->pair = A;
-					A->pair = c;
-					a->owner = ph->owner;
-					b->owner = ph->owner;
-					c->owner = ph->owner;
-					for (int ii = 0; ii < 3; ii++)
-					{
-						if (ph->owner->corner[ii] == j){
-							ph->owner->corner[ii] = k;
-						}
-					}
-					auto f = new face(_nFaces, ph->owner->corner[0], ph->owner->corner[1], ph->owner->corner[2]);
-					A->owner = f;
-					B->owner = f;
-					C->owner = f;
-					for (int ii = 0; ii < 3; ii++)
-					{
-						if (f->corner[ii] == i){
-							f->corner[ii] = k;
-						}
-					}
-					faces.push_back(f);
-					val->Faces.push_back(MeshFace(f->corner[0], f->corner[1], f->corner[2], val->Faces[ph->owner->N].N));
-					facet_list.push_back(facet_list[ph->owner->N]);
-
-					_nFaces++;
-				}
-			}
-			for (auto ph : vectorPool[j])
-			{
-				if (ph->next->P->N == i)
-				{
-					std::cout << "yayAA!" << endl;
-					auto newHF = new halfedge(newVert);
-					auto newHHF = new halfedge(newVert);
-					pool.push_back(newHF);
-					pool.push_back(newHHF);
-					auto newOHHF = new halfedge(ph->prev->P);
-					vectorPool[newOHHF->P->N].push_back(newOHHF);
-					halfedges.push_back(newHF);
-					halfedges.push_back(newHHF);
-					halfedges.push_back(newOHHF);
-					auto a = ph->prev;
-					auto b = ph;
-					auto c = newHHF;
-					auto A = newOHHF;
-					auto B = newHF;
-					auto C = ph->next;
-					b0 = b;
-					b1 = B;
-					a->next = b;
-					b->next = c;
-					c->next = a;
-					A->next = B;
-					B->next = C;
-					C->next = A;
-					a->prev = c;
-					b->prev = a;
-					c->prev = b;
-					A->prev = C;
-					B->prev = A;
-					C->prev = B;
-					c->pair = A;
-					A->pair = c;
-					a->owner = ph->owner;
-					b->owner = ph->owner;
-					c->owner = ph->owner;
-					for (int ii = 0; ii < 3; ii++)
-					{
-						if (ph->owner->corner[ii] == i){
-							ph->owner->corner[ii] = k;
-						}
-					}
-					auto f = new face(_nFaces, ph->owner->corner[0], ph->owner->corner[1], ph->owner->corner[2]);
-					A->owner = f;
-					B->owner = f;
-					C->owner = f;
-					for (int ii = 0; ii < 3; ii++)
-					{
-						if (f->corner[ii] == j){
-							f->corner[ii] = k;
-						}
-					}
-					faces.push_back(f);
-					facet_list.push_back(facet_list[ph->owner->N]);
-					val->Faces.push_back(MeshFace(f->corner[0], f->corner[1], f->corner[2], val->Faces[ph->owner->N].N));
-					_nFaces++;
-				}
-			}
-			vectorPool.push_back(pool);
-			if (_nVertices == 218110)
-			{
-				for (auto hh : vectorPool[_nVertices])
-				{
-					std::cout <<"218110:"<< hh->pair << endl;
-				}
-			}
-			_nVertices++;
-			a0->pair = b1;
-			b1->pair = a0;
-			a1->pair = b0;
-			b0->pair = a1;
-		}
-		std::cout << "end"<<_nVertices << endl;
-		std::cout << "finished" << endl;
-		for (auto hf : halfedges)
-		{
-			if (hf->pair == NULL)
-			{
-				std::cout << "(" << hf->P -> N << "-" << hf->next->P->N << ")" << endl;
-			}
-		}*/
+		
 
 
 		//onestars
@@ -832,7 +528,7 @@ namespace GeometryProcessing
 						VV = VV + V;
 					}
 					VV = VV / ((double)v->star.size());
-					VV = VV / ((double)1000);
+					VV = VV / ((double)10.);
 					val->Vertices.push_back(val->Vertices[i] + VV);
 					vertices[_nVertices + j]->hf_begin = stars[j + 1][0];
 					vertices[_nVertices + j]->star = stars[j + 1];
@@ -940,7 +636,7 @@ namespace GeometryProcessing
 					auto D2 = facet_list[ph->pair->owner->N].second;
 					auto V2 = cell2->vertex(D2)->point() - mid;
 					VV = VV + V1+V2;
-					VV = VV / 2.0/100.;
+					VV = VV / 2.0/10.;
 					vector<halfedge*> pool;
 					val->Vertices.push_back(Point((P.x() + Q.x()) / 2. + VV.x(), (P.y() + Q.y()) / 2. + VV.y(), (P.z() + Q.z()) / 2. + VV.z()));
 					__int64 l = _nVertices;
@@ -1151,15 +847,7 @@ namespace GeometryProcessing
 	}
 	void MeshStructure::halfEdgeAdd(face *f)
 	{
-		static int counter = 0;
-		std::cout << counter << endl;
-		counter++;
 		auto _o = orient::unknown;
-		int nNN = 15952;
-		if (counter >= nNN)
-		{
-			std::cout << "N:" << counter <<"-A"<< endl;
-		}
 		for (int i = 0; i < 3; i++)
 		{
 			__int64 I = f->corner[i];
@@ -1197,10 +885,6 @@ namespace GeometryProcessing
 				}
 			}
 		}
-		if (counter >= nNN)
-		{
-			std::cout << "N:" << counter << "-B" << endl;
-		}
 		__orientation[f->N] = orient::unknown;
 		if (_o == orient::unknown)
 			__orientation[f->N] = orient::positive; else __orientation[f->N] = _o;
@@ -1233,10 +917,6 @@ namespace GeometryProcessing
 			f->firsthalfedge = he1;
 		}
 
-		if (counter >= nNN)
-		{
-			std::cout << "N:" << counter << "-C" << endl;
-		}
 
 		//list up neighbors that are not oriented
 		for (int i = 0; i < 3; i++)
@@ -1330,7 +1010,7 @@ namespace GeometryProcessing
 		{
 			halfedge_descriptor hd = CGAL::halfedge(*eb,P);
 			if ( is_border(*eb,P) ){
-				std::cout << "border" << std::endl;
+				//std::cout << "border" << std::endl;
 				++nb_sharp_edges;
 				constraint_hmap[*eb]=true;
 				constrained_edges[*eb]=std::make_pair(point(source(hd,P),P),
@@ -1346,7 +1026,7 @@ namespace GeometryProcessing
 					PP p = point(source(hd,P),P);
 					PP q = point(target(hd,P),P);
 					constrained_edges[*eb]=std::make_pair(p,q);
-					std::cout << "2 " << p << " "  << q << "\n";
+					//std::cout << "2 " << p << " "  << q << "\n";
 				}
 			}
 		}
@@ -1372,7 +1052,6 @@ namespace GeometryProcessing
 			<< (P.size_of_halfedges() / 2) << " final edges.\n";
 		std::cout << "P.is_valid=" << (P.is_valid() ? "true" : "false") << endl;
 		std::cout << "P.is_closed=" << (P.is_closed() ? "true" : "false") << endl;
-
 		return P;
 	}
 	void MeshStructure::Clear()

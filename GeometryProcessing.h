@@ -27,8 +27,8 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
 
 #include <vector>
-//#include<Eigen/Dense>
-//#include<Eigen/Sparse>
+#include<Eigen/Dense>
+#include<Eigen/Sparse>
 #include"face.h"
 #include"halfedge.h"
 #include"vertex.h"
@@ -153,11 +153,9 @@ namespace GeometryProcessing
         vector<vertex*> outerVertices;  
 	private:
 		//halfedge** __halfedgeTable;
-		//Eigen::SparseMatrix<halfedge*> __halfedgeTable;
-		//Eigen::SparseMatrix<vector<face*>*> _faceTable;
-		vector<halfedge*>* __halfedgeTable;
-		vector<std::pair<face*, __int64>>* _faceTable;
-		orient* __orientation;
+		Eigen::SparseMatrix<halfedge*> __halfedgeTable;
+		Eigen::SparseMatrix<vector<face*>*> _faceTable;
+        orient* __orientation;
 	public:
 		vector<halfedge*> edges();
 		__int64 nVertices();

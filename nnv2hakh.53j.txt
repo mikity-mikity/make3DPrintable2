@@ -1,0 +1,54 @@
+﻿
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   ALL_BUILD.vcxproj
+#	modified:   ALL_BUILD.vcxproj.filters
+#	modified:   CMakeCache.txt
+#	deleted:    CMakeFiles/2.8.12.2/CMakeDetermineCompilerABI_C.bin
+#	deleted:    CMakeFiles/2.8.12.2/CMakeDetermineCompilerABI_CXX.bin
+#	deleted:    CMakeFiles/2.8.12.2/CompilerIdC/CompilerIdC.exe
+#	deleted:    CMakeFiles/2.8.12.2/CompilerIdCXX/CompilerIdCXX.exe
+#	renamed:    CMakeFiles/2.8.12.2/CMakeCCompiler.cmake -> CMakeFiles/3.2.1/CMakeCCompiler.cmake
+#	renamed:    CMakeFiles/2.8.12.2/CMakeCXXCompiler.cmake -> CMakeFiles/3.2.1/CMakeCXXCompiler.cmake
+#	renamed:    CMakeFiles/CMakeDetermineCompilerABI_CXX.bin -> CMakeFiles/3.2.1/CMakeDetermineCompilerABI_C.bin
+#	renamed:    CMakeFiles/CMakeDetermineCompilerABI_C.bin -> CMakeFiles/3.2.1/CMakeDetermineCompilerABI_CXX.bin
+#	renamed:    CMakeFiles/2.8.12.2/CMakeRCCompiler.cmake -> CMakeFiles/3.2.1/CMakeRCCompiler.cmake
+#	renamed:    CMakeFiles/2.8.12.2/CMakeSystem.cmake -> CMakeFiles/3.2.1/CMakeSystem.cmake
+#	renamed:    CMakeFiles/2.8.12.2/CompilerIdC/CMakeCCompilerId.c -> CMakeFiles/3.2.1/CompilerIdC/CMakeCCompilerId.c
+#	new file:   CMakeFiles/3.2.1/CompilerIdC/CompilerIdC.exe
+#	renamed:    CMakeFiles/2.8.12.2/CompilerIdC/CompilerIdC.vcxproj -> CMakeFiles/3.2.1/CompilerIdC/CompilerIdC.vcxproj
+#	renamed:    CMakeFiles/2.8.12.2/CompilerIdCXX/CMakeCXXCompilerId.cpp -> CMakeFiles/3.2.1/CompilerIdCXX/CMakeCXXCompilerId.cpp
+#	new file:   CMakeFiles/3.2.1/CompilerIdCXX/CompilerIdCXX.exe
+#	renamed:    CMakeFiles/2.8.12.2/CompilerIdCXX/CompilerIdCXX.vcxproj -> CMakeFiles/3.2.1/CompilerIdCXX/CompilerIdCXX.vcxproj
+#	renamed:    CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/generate.stamp.rule -> CMakeFiles/31ca8c10465dd68e7c3e9076945baffe/generate.stamp.rule
+#	deleted:    CMakeFiles/ALL_BUILD.rule
+#	deleted:    CMakeFiles/CMakeCCompiler.cmake
+#	deleted:    CMakeFiles/CMakeCPlatform.cmake
+#	deleted:    CMakeFiles/CMakeCXXCompiler.cmake
+#	deleted:    CMakeFiles/CMakeCXXPlatform.cmake
+#	deleted:    CMakeFiles/CMakeRCCompiler.cmake
+#	deleted:    CMakeFiles/CMakeSystem.cmake
+#	modified:   CMakeFiles/TargetDirectories.txt
+#	deleted:    CMakeFiles/ZERO_CHECK.rule
+#	deleted:    CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/ALL_BUILD.rule
+#	deleted:    CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/ZERO_CHECK.rule
+#	new file:   CMakeFiles/feature_tests.bin
+#	new file:   CMakeFiles/feature_tests.cxx
+#	modified:   CMakeFiles/generate.stamp
+#	modified:   CMakeFiles/generate.stamp.depend
+#	modified:   CMakeFiles/generate.stamp.list
+#	deleted:    CMakeFiles/generate.stamp.rule
+#	modified:   CMakeLists.txt
+#	modified:   MinSizeRel/fast_location_3.exe
+#	modified:   Triangulation_3_example.sln
+#	modified:   ZERO_CHECK.vcxproj
+#	modified:   ZERO_CHECK.vcxproj.filters
+#	modified:   cmake_install.cmake
+#	modified:   fast_location_3.vcxproj
+#	modified:   fast_location_3.vcxproj.filters
+#
+

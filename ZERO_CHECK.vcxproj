@@ -1,70 +1,71 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
+    <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
+    <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="MinSizeRel|Win32">
+    <ProjectConfiguration Include="MinSizeRel|x64">
       <Configuration>MinSizeRel</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
       <Configuration>RelWithDebInfo</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{B9944EA7-6C24-494C-9572-54E79E4B8F6A}</ProjectGUID>
+    <ProjectGUID>{91381BF2-5CE7-4FD4-A1BD-53A6E74A76B0}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
-    <Platform>Win32</Platform>
+    <Platform>x64</Platform>
     <ProjectName>ZERO_CHECK</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Utility</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Utility</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
     <ConfigurationType>Utility</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
     <ConfigurationType>Utility</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />  </ImportGroup>
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
     <PropertyGroup>
       <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>C:\CGAL-4.4\examples\Triangulation_3\..\..\include;C:\CGAL-4.4\auxiliary\gmp\include;C:\CGAL-4.4\examples\Triangulation_3;C:\CGAL-4.4\include;C:\local\boost_1_55_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CGAL-4.5.2\include;C:\CGAL-4.5.2\auxiliary\gmp\include;C:\Users\Masaaki\Documents\GitHub\sprout;C:\local\boost_1_57_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -72,9 +73,9 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>C:\CGAL-4.4\examples\Triangulation_3\..\..\include;C:\CGAL-4.4\auxiliary\gmp\include;C:\CGAL-4.4\examples\Triangulation_3;C:\CGAL-4.4\include;C:\local\boost_1_55_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CGAL-4.5.2\include;C:\CGAL-4.5.2\auxiliary\gmp\include;C:\Users\Masaaki\Documents\GitHub\sprout;C:\local\boost_1_57_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -82,9 +83,9 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>C:\CGAL-4.4\examples\Triangulation_3\..\..\include;C:\CGAL-4.4\auxiliary\gmp\include;C:\CGAL-4.4\examples\Triangulation_3;C:\CGAL-4.4\include;C:\local\boost_1_55_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CGAL-4.5.2\include;C:\CGAL-4.5.2\auxiliary\gmp\include;C:\Users\Masaaki\Documents\GitHub\sprout;C:\local\boost_1_57_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -92,9 +93,9 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>C:\CGAL-4.4\examples\Triangulation_3\..\..\include;C:\CGAL-4.4\auxiliary\gmp\include;C:\CGAL-4.4\examples\Triangulation_3;C:\CGAL-4.4\include;C:\local\boost_1_55_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CGAL-4.5.2\include;C:\CGAL-4.5.2\auxiliary\gmp\include;C:\Users\Masaaki\Documents\GitHub\sprout;C:\local\boost_1_57_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -103,10 +104,10 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="CMakeFiles\cd4b8de6b12a9a60534dba3c0c7cceac\generate.stamp.rule">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Checking Build System</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -HC:/CGAL-4.4/examples/Triangulation_3 -BC:/CGAL-4.4/examples/Triangulation_3 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+    <CustomBuild Include="C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\31ca8c10465dd68e7c3e9076945baffe\generate.stamp.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HC:/Users/Masaaki/Documents/GitHub/sprout -BC:/Users/Masaaki/Documents/GitHub/sprout --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -114,12 +115,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/generate.stamp.rule;C:\CGAL-4.4\CGALConfig.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.4\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.4\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.4\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.4\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.4\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.4\cmake\modules\UseCGAL.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCXXCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeRCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeSystem.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeLists.txt;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Checking Build System</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -HC:/CGAL-4.4/examples/Triangulation_3 -BC:/CGAL-4.4/examples/Triangulation_3 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:/Users/Masaaki/Documents/GitHub/sprout/CMakeFiles/31ca8c10465dd68e7c3e9076945baffe/generate.stamp.rule;C:\CGAL-4.5.2\CGALConfig.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.5.2\cmake\modules\UseCGAL.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\WindowsPaths.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCXXCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeRCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeSystem.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HC:/Users/Masaaki/Documents/GitHub/sprout -BC:/Users/Masaaki/Documents/GitHub/sprout --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -127,12 +128,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/generate.stamp.rule;C:\CGAL-4.4\CGALConfig.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.4\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.4\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.4\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.4\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.4\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.4\cmake\modules\UseCGAL.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCXXCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeRCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeSystem.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeLists.txt;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Checking Build System</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -HC:/CGAL-4.4/examples/Triangulation_3 -BC:/CGAL-4.4/examples/Triangulation_3 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:/Users/Masaaki/Documents/GitHub/sprout/CMakeFiles/31ca8c10465dd68e7c3e9076945baffe/generate.stamp.rule;C:\CGAL-4.5.2\CGALConfig.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.5.2\cmake\modules\UseCGAL.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\WindowsPaths.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCXXCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeRCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeSystem.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HC:/Users/Masaaki/Documents/GitHub/sprout -BC:/Users/Masaaki/Documents/GitHub/sprout --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -140,12 +141,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/generate.stamp.rule;C:\CGAL-4.4\CGALConfig.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.4\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.4\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.4\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.4\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.4\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.4\cmake\modules\UseCGAL.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCXXCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeRCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeSystem.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeLists.txt;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Checking Build System</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -HC:/CGAL-4.4/examples/Triangulation_3 -BC:/CGAL-4.4/examples/Triangulation_3 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:/Users/Masaaki/Documents/GitHub/sprout/CMakeFiles/31ca8c10465dd68e7c3e9076945baffe/generate.stamp.rule;C:\CGAL-4.5.2\CGALConfig.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.5.2\cmake\modules\UseCGAL.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\WindowsPaths.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCXXCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeRCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeSystem.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files (x86)\CMake\bin\cmake.exe" -HC:/Users/Masaaki/Documents/GitHub/sprout -BC:/Users/Masaaki/Documents/GitHub/sprout --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -153,61 +154,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/generate.stamp.rule;C:\CGAL-4.4\CGALConfig.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.4\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.4\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.4\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.4\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.4\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.4\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.4\cmake\modules\UseCGAL.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeCXXCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeRCCompiler.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\2.8.12.2\CMakeSystem.cmake;C:\CGAL-4.4\examples\Triangulation_3\CMakeLists.txt;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake 2.8\share\cmake-2.8\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\generate.stamp</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:/Users/Masaaki/Documents/GitHub/sprout/CMakeFiles/31ca8c10465dd68e7c3e9076945baffe/generate.stamp.rule;C:\CGAL-4.5.2\CGALConfig.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Common.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_CreateSingleSourceCGALProgram.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_GeneratorSpecificSettings.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_Macros.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_SetupFlags.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_TweakFindBoost.cmake;C:\CGAL-4.5.2\cmake\modules\CGAL_VersionUtils.cmake;C:\CGAL-4.5.2\cmake\modules\UseCGAL.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCXXInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeGenericSystem.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeRCInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows-MSVC.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\Windows.cmake;C:\Program Files (x86)\CMake\share\cmake-3.2\Modules\Platform\WindowsPaths.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeCXXCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeRCCompiler.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\3.2.1\CMakeSystem.cmake;C:\Users\Masaaki\Documents\GitHub\sprout\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="CMakeFiles\cd4b8de6b12a9a60534dba3c0c7cceac\ZERO_CHECK.rule">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"></Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\ZERO_CHECK</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"></Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\ZERO_CHECK</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'"></Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\ZERO_CHECK</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'"></Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
-:cmEnd
-endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
-:cmErrorLevel
-exit /b %1
-:cmDone
-if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">C:/CGAL-4.4/examples/Triangulation_3/CMakeFiles/cd4b8de6b12a9a60534dba3c0c7cceac/ZERO_CHECK.rule;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">C:\CGAL-4.4\examples\Triangulation_3\CMakeFiles\ZERO_CHECK</Outputs>
-      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CMakeFiles\ZERO_CHECK" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

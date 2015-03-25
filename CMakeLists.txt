@@ -21,22 +21,9 @@ if ( CGAL_FOUND )
 
   include( CGAL_CreateSingleSourceCGALProgram )
 
-  include_directories (BEFORE "../../include")
+  include_directories (BEFORE "C:/CGAL-4.5.2/include")
 
-  create_single_source_cgal_program( "adding_handles_3.cpp" )
-  create_single_source_cgal_program( "color.cpp" )
-  create_single_source_cgal_program( "copy_triangulation_3.cpp" )
   create_single_source_cgal_program( "fast_location_3.cpp" )
-  create_single_source_cgal_program( "find_conflicts_3.cpp" )
-  create_single_source_cgal_program( "info_insert_with_pair_iterator.cpp" )
-  create_single_source_cgal_program( "info_insert_with_pair_iterator_regular.cpp" )
-  create_single_source_cgal_program( "info_insert_with_transform_iterator.cpp" )
-  create_single_source_cgal_program( "info_insert_with_zip_iterator.cpp" )
-  create_single_source_cgal_program( "linking_2d_and_3d.cpp" )
-  create_single_source_cgal_program( "regular_3.cpp" )
-  create_single_source_cgal_program( "simple_triangulation_3.cpp" )
-  create_single_source_cgal_program( "simplex.cpp" )
-  create_single_source_cgal_program( "tds.cpp" )
 
 else()
   

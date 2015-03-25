@@ -1,19 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="CMakeFiles\cd4b8de6b12a9a60534dba3c0c7cceac\generate.stamp.rule">
+    <CustomBuild Include="C:\Users\Masaaki\Documents\GitHub\sprout\CMakeFiles\31ca8c10465dd68e7c3e9076945baffe\generate.stamp.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
-    <CustomBuild Include="CMakeFiles\cd4b8de6b12a9a60534dba3c0c7cceac\ZERO_CHECK.rule">
-      <Filter>CMake Rules</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="CMakeFiles\ZERO_CHECK" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{F00CD3AA-B732-423B-AE97-083B8BFCD43F}</UniqueIdentifier>
+      <UniqueIdentifier>{42F1A19D-C3B1-42D0-A6CD-EEBFC2F7F25F}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

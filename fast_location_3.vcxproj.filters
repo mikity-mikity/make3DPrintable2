@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="C:\Users\Masaaki\Documents\GitHub\sprout\fast_location_3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="face.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -13,9 +16,14 @@
     <ClCompile Include="vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="fast_location_3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Masaaki\Documents\GitHub\sprout\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{AA74534F-169B-4AF6-B02E-DA31A878CBD6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="face.h">
@@ -30,19 +38,5 @@
     <ClInclude Include="vertex.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{CE9AF545-BFB7-450A-AA22-494E2B22B7FE}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
   </ItemGroup>
 </Project>

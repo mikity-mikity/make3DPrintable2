@@ -358,21 +358,24 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 	GeometryProcessing::MeshStructure *MS;
 	std::map<vertex*,boost::tuple<Eigen::Vector3d,Eigen::Vector3d>> info;
 	boost::tie(t,MS,info)=tMS;
-	double tt[4]={-0.5,-0.4,0.4,0.5};
+	double tt[6] = { -0.505, -0.5, -0.4, 0.4, 0.5, 0.505 };
 	CGAL::Color col = CGAL::BLUE;
 	for(auto v:MS->vertices)
 	{
 		if(!v->isBoundary()){
 			Eigen::Vector3d P,N; //Position,Normal
 			boost::tie(P,N)=info.find(v)->second;
-			for(int i=0;i<4;i++)
+			for(int i=0;i<6;i++)
 			{
 				Eigen::Vector3d Pc=P+tt[i]*t*N;
-				if (i == 0 || i == 3)
+				if (i == 0 || i == 5)
 				{
 					col = CGAL::RED;
 				}
-				else
+				else if(i==1||i==4)
+				{
+					col = CGAL::YELLOW;
+				}else
 				{
 					col = CGAL::BLUE;
 				}
@@ -387,7 +390,7 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 			Eigen::Vector3d P1,P2,N1,N2; //Position,Normal
 			boost::tie(P1,N1)=info.find(e->P)->second;
 			boost::tie(P2,N2)=info.find(e->next->P)->second;
-			for(int i=0;i<4;i++)
+			for(int i=0;i<6;i++)
 			{
 
 				Eigen::Vector3d P1in=P1+tt[i]*t*N1;
@@ -396,9 +399,13 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 				double L=T.norm();
 				int LDIV=4;
 				if(L>baseRes*4.0)LDIV=(int)(L/baseRes);
-				if (i == 0 || i == 3)
+				if (i == 0 || i == 5)
 				{
 					col = CGAL::RED;
+				}
+				else if (i == 1 || i == 4)
+				{
+					col = CGAL::YELLOW;
 				}
 				else
 				{
@@ -440,7 +447,7 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 		double L=max(ll);
 		int LDIV=(int)(L/baseRes);
 		if(LDIV<4)LDIV=4;
-		for(int i=0;i<4;i++)
+		for(int i=0;i<6;i++)
 		{
 			_P1=P1+N1*t*tt[i];
 			_P2=P2+N2*t*tt[i];
@@ -449,9 +456,13 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 			//auto T12=_P2-_P1;
 			auto T23=_P3-_P2;
 			auto T13=_P3-_P1;
-			if (i == 0 || i == 3)
+			if (i == 0 || i == 5)
 			{
 				col = CGAL::RED;
+			}
+			else if (i == 1 || i == 4)
+			{
+				col = CGAL::YELLOW;
 			}
 			else
 			{
@@ -471,6 +482,7 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 				}
 			}
 		}
+		//boundary treatment
 		if (b1){
 
 		}
@@ -621,20 +633,27 @@ void generate_exterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &ec
 					double theta=(double)(i)/RDIV*2.*PI;
 
 					Vector BI=0.8*Radius*(beforeX*std::cos(theta)+beforeY*std::sin(theta));
-					Vector BE=1.00*Radius*(beforeX*std::cos(theta)+beforeY*std::sin(theta));
+					Vector BD = 1.00*Radius*(beforeX*std::cos(theta) + beforeY*std::sin(theta));
+					Vector BE = 1.005*Radius*(beforeX*std::cos(theta) + beforeY*std::sin(theta));
 
 					//Project N
 					double cI1=-(BI*itrD->Normal)/(V*itrD->Normal);
 					double cI2=-(BI*(itrD+1)->Normal)/(V*(itrD+1)->Normal);
-					double cE1=-(BE*itrD->Normal)/(V*itrD->Normal);
+					double cD1 = -(BD*itrD->Normal) / (V*itrD->Normal);
+					double cD2 = -(BD*(itrD + 1)->Normal) / (V*(itrD + 1)->Normal);
+					double cE1 = -(BE*itrD->Normal) / (V*itrD->Normal);
 					double cE2=-(BE*(itrD+1)->Normal)/(V*(itrD+1)->Normal);
-					Vector tmpI1=BI+cI1*V;
-					Vector tmpI2=BI+cI2*V;
-					Vector tmpE1=BE+cE1*V;
-					Vector tmpE2=BE+cE2*V;
-					Point DI1=(*itrC)+tmpI1;
-					Point DI2=(*(itrC+1))+tmpI2;
-					Point DE1=(*itrC)+tmpE1;
+					Vector tmpI1 = BI + cI1*V;
+					Vector tmpI2 = BI + cI2*V;
+					Vector tmpD1 = BD + cD1*V;
+					Vector tmpD2 = BD + cD2*V;
+					Vector tmpE1 = BE + cE1*V;
+					Vector tmpE2 = BE + cE2*V;
+					Point DI1 = (*itrC) + tmpI1;
+					Point DI2 = (*(itrC + 1)) + tmpI2;
+					Point DD1 = (*itrC) + tmpD1;
+					Point DD2 = (*(itrC + 1)) + tmpD2;
+					Point DE1 = (*itrC) + tmpE1;
 					Point DE2=(*(itrC+1))+tmpE2;
 					if (itrC == _branch->begin() && ss == 0)
 					{
@@ -651,15 +670,20 @@ void generate_exterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &ec
 
 					if(itrC==itrEnd)
 					{
-						Point DI(DI2.x()*s+DI1.x()*(1-s),DI2.y()*s+DI1.y()*(1-s),DI2.z()*s+DI1.z()*(1-s));
-						Point DE(DE2.x()*s+DE1.x()*(1-s),DE2.y()*s+DE1.y()*(1-s),DE2.z()*s+DE1.z()*(1-s));
+						Point DI(DI2.x()*s + DI1.x()*(1 - s), DI2.y()*s + DI1.y()*(1 - s), DI2.z()*s + DI1.z()*(1 - s));
+						Point DD(DD2.x()*s + DD1.x()*(1 - s), DD2.y()*s + DD1.y()*(1 - s), DD2.z()*s + DD1.z()*(1 - s));
+						Point DE(DE2.x()*s + DE1.x()*(1 - s), DE2.y()*s + DE1.y()*(1 - s), DE2.z()*s + DE1.z()*(1 - s));
 						exterior.push_back(std::make_pair(DI, col_int(col, -1)));
+						exterior.push_back(std::make_pair(DD, col_int(CGAL::YELLOW, -1)));
 						exterior.push_back(std::make_pair(DE, col_int(CGAL::RED, -1)));
-					}else
+					}
+					else
 					{
 						Point DI(DI2.x()*s+DI1.x()*(1-s),DI2.y()*s+DI1.y()*(1-s),DI2.z()*s+DI1.z()*(1-s));
-						Point DE(DE2.x()*s+DE1.x()*(1-s),DE2.y()*s+DE1.y()*(1-s),DE2.z()*s+DE1.z()*(1-s));
+						Point DD(DD2.x()*s + DD1.x()*(1 - s), DD2.y()*s + DD1.y()*(1 - s), DD2.z()*s + DD1.z()*(1 - s));
+						Point DE(DE2.x()*s + DE1.x()*(1 - s), DE2.y()*s + DE1.y()*(1 - s), DE2.z()*s + DE1.z()*(1 - s));
 						exterior.push_back(std::make_pair(DI, col_int(col, -1)));
+						exterior.push_back(std::make_pair(DD, col_int(CGAL::YELLOW, -1)));
 						exterior.push_back(std::make_pair(DE, col_int(CGAL::RED, -1)));
 					}
 				}
@@ -742,7 +766,7 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 {	
 	__int64 numInterior=0;
 	__int64 next=0;
-	double tt[10] = { 0.465,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.46};
+	double tt[12] = { 0.48,0.465,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.465,-0.48};
 	double uv_ser[12] = { 0.1, 0.13, 0.16, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.84, 0.87, 0.9 };
 	for (auto tMS : mesh_infos)
 	{
@@ -750,7 +774,7 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 		GeometryProcessing::MeshStructure *MS;
 		std::map<vertex*,boost::tuple<Eigen::Vector3d,Eigen::Vector3d>> info;
 		boost::tie(t,MS,info)=tMS;
-		int TDIV=10;
+		int TDIV=12;
 		vector<boost::tuple<vector<face*>::iterator, vector<face*>::iterator, info2*, int>> tasks;
 		__int64 size= MS->faces.size();
 		int nTasks = 100;
@@ -920,18 +944,18 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		//double edge = 2 * std::sin(alpha)*Radius;
 		//double dx = edge / YDIV;
 		myInfo->particles.clear();
-		double tt[7] = { 0.97, 0.95,0.93,0.9,0.87,0.84,0.81 };
+		double tt[10] = { 0.99,0.98,0.97, 0.95,0.93,0.9,0.87,0.84,0.825,0.81 };
 		for (int i = 0; i < RDIV; i++)
 		{
 			double theta1 = 2.*PI*((double)i) / ((double)RDIV);
 			double theta2 = 2.*PI*((double)i+1) / ((double)RDIV);
-			for (int k = 0; k < 7; k++)
+			for (int k = 0; k < 10; k++)
 			{
 				Point point1(tt[k] * R2*std::cos(theta1), R2*std::sin(theta1), 0);
 				Point point2(tt[k] * R2*std::cos(theta2), R2*std::sin(theta2), 0);
-				for (int j = 0; j < 12; j++)
+				for (int j = 0; j < 24; j++)
 				{
-					Point v = point1 + (point2 - point1)*(((double)j) / 12.);
+					Point v = point1 + (point2 - point1)*(((double)j) / 24.);
 					myInfo->particles.push_back(v);
 				}
 			}
@@ -979,7 +1003,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 			else{
 				myInfo->DIV = (int)(Length / baseRes) + 1;
 			}
-			myInfo->DIV *= 5;
+			myInfo->DIV *= 15;
 			__int64 __nI = 0;
 			func(*myInfo,__nI);
 			cs.lock();
@@ -1230,7 +1254,7 @@ int main(int argc, char *argv[])
 	__int64 count = 0;
 	for (Delaunay::Finite_cells_iterator itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++, N++)
 	{
-		if (itr->vertex(0)->info().col == CGAL::RED&&itr->vertex(1)->info().col == CGAL::RED&&itr->vertex(2)->info().col == CGAL::RED&&itr->vertex(3)->info().col == CGAL::RED)
+		if ((itr->vertex(0)->info().col == CGAL::RED || itr->vertex(0)->info().col == CGAL::YELLOW) && (itr->vertex(1)->info().col == CGAL::RED || itr->vertex(1)->info().col == CGAL::YELLOW) && (itr->vertex(2)->info().col == CGAL::RED || itr->vertex(2)->info().col == CGAL::YELLOW) && (itr->vertex(3)->info().col == CGAL::RED || itr->vertex(3)->info().col == CGAL::YELLOW))
 		{
 			bool_list[N] = false;
 		}
@@ -1238,6 +1262,7 @@ int main(int argc, char *argv[])
 		{
 			bool_list[N] = true;
 		}
+		//if (cells[N] >= 1 && (itr->vertex(0)->info().col != CGAL::RED && itr->vertex(1)->info().col != CGAL::RED && itr->vertex(2)->info().col != CGAL::RED && itr->vertex(3)->info().col != CGAL::RED))bool_list[N] = true;
 		if (cells[N] >= 1)bool_list[N] = true;
 	}
 	std::cout << "push and pop" << endl;
@@ -1251,52 +1276,42 @@ int main(int argc, char *argv[])
 			if (bool_list[N] == false)
 			{
 				int count = 0;
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i<4; i++)
 				{
 					Delaunay::Cell_handle _neighbor = itr->neighbor(i);
 					//std::map<Delaunay::Cell_handle, int>::iterator it_N = index.find(_neighbor);
-					if (_neighbor->info() != -1)
+					if (_neighbor->info()!=-1)
 					{
 						if (bool_list[_neighbor->info()])count++;
 					}
 				}
-				if (count > 2){
+				if (count>2){
 					bool_list[N] = true;
 					//everything++;
 					num++;
 				}
 			}
-		}
-		std::cout << "refine:" << TT << ", filled:" << num << endl;
-		TT++;
-		if (num == 0)break;
-	}
-	for (int i = 0; i < 2; i++)
-	{
-		int num = 0;
-		N = 0;
-		for (Delaunay::Finite_cells_iterator itr = T.finite_cells_begin(); itr != T.finite_cells_end(); itr++, N++)
-		{
-			if (bool_list[N] == true)
+			/*if(bool_list[N]==true)
 			{
-				int count = 0;
-				for (int i = 0; i < 4; i++)
+				int count=0;
+				for(int i=0;i<4;i++)
 				{
-					Delaunay::Cell_handle _neighbor = itr->neighbor(i);
+					Delaunay::Cell_handle _neighbor=itr->neighbor(i);
 					if (_neighbor->info() != -1)
 					{
 						if (!bool_list[_neighbor->info()])count++;
 					}
 				}
-				if (count > 2){
-					bool_list[N] = false;
-					//everything++;
-					num++;
+				if(count>2){
+				bool_list[N]=false;
+				//everything++;
+				num++;
 				}
-			}
+			}*/
 		}
-		std::cout << "refine:" << TT << ", pushed:" << num << endl;
+
 		TT++;
+		std::cout << "refine:" << TT << ", corrected:" << num << endl;
 		if (num == 0)break;
 	}
 

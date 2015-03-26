@@ -552,7 +552,7 @@ namespace GeometryProcessing
 					VV = VV + V;
 				}
 				VV = VV / ((double)v->star.size());
-				VV = VV / ((double)1000);
+				VV = VV / ((double)10.);
 				val->Vertices[i] = val->Vertices[i] + VV;
 				__int64 SS = stars.size() - 1;
 				for (__int64 j = 0; j < SS; j++)
@@ -1003,9 +1003,6 @@ namespace GeometryProcessing
 
 	void  MeshStructure::halfEdgeAdd(face *f)
 	{
-		static int counter = 0;
-		std::cout << counter << endl;
-		counter++;
 		auto _o = orient::unknown;
 		vector<face*> faces;
 		for (int i = 0; i < 3; i++)

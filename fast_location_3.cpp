@@ -742,7 +742,7 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 {	
 	__int64 numInterior=0;
 	__int64 next=0;
-	double tt[10] = { 0.465,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.46};
+	double tt[10] = {0.465,0.45,0.43,0.42,0.41,-0.41,-0.42,-0.43,-0.45,-0.46};
 	double uv_ser[12] = { 0.1, 0.13, 0.16, 0.23, 0.34,0.45,0.55, 0.66, 0.77, 0.84, 0.87, 0.9 };
 	for (auto tMS : mesh_infos)
 	{

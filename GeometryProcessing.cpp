@@ -828,61 +828,6 @@ namespace GeometryProcessing
 			}
 
 		}
-		/*vectorPool.clear();
-		for (int i = 0; i < val->Vertices.size(); i++)
-		{
-			vectorPool.push_back(vector<halfedge*>());
-		}
-		for (auto hf : halfedges)
-		{
-			vectorPool[hf->P->N].push_back(hf);
-		}
-		*/
-		//std::cin.get();
-		//post process to create onering
-		/*for (auto v : vertices)
-		{
-			auto h = v->hf_begin;
-			v->onering.clear();
-			do
-			{
-				do
-				{
-					h = h->next;
-					v->onering.push_back(h);
-				} while (h->next->next->P != v);
-				if (h->next->pair->isBoundary()) break;
-				h = h->next->pair;
-			} while (h != v->hf_begin);
-		}
-		__int64 error = 0;
-		for (auto hf : halfedges)
-		{
-			if (hf->pair->pair != hf)error++;
-			if (hf->next->next->next != hf)error++;
-		}
-		for (auto v : vertices)
-		{
-			for (auto vv : v->star){
-				if (vv->pair->next->P != v)error++;
-			}
-			for (int i = 0; i < v->onering.size(); i++)
-			{
-				if (i != v->onering.size() - 1)
-				{
-					auto vv = v->onering[i];
-					auto vvv = v->onering[i + 1];
-					if (vv->next->pair->next != vvv)error++;
-				}
-				else
-				{
-					auto vv = v->onering[v->onering.size() - 1];
-					auto vvv = v->onering[0];
-					if (vv->next->pair->next != vvv)error++;
-				}
-			}
-		}
-		std::cout << error << "errors found" << endl;*/
 	}
 	void  MeshStructure::halfEdgeAdd(vector<face *>f)
 	{

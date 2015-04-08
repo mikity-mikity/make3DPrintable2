@@ -415,9 +415,9 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 	}
 	for(auto f:MS->faces)
 	{
-		bool b1 = f->firsthalfedge->isBoundary();
-		bool b2 = f->firsthalfedge->next->isBoundary();
-		bool b3 = f->firsthalfedge->next->next->isBoundary();
+		bool b1 = f->firsthalfedge->pair->isBoundary();
+		bool b2 = f->firsthalfedge->next->pair->isBoundary();
+		bool b3 = f->firsthalfedge->next->next->pair->isBoundary();
 		Eigen::Vector3d P1, P2, P3, N1, N2, N3, P1out, P1in, P2out, P2in, P3out, P3in, _P1, _P2, _P3; //Position,Normal
 		boost::tie(P1,N1)=info.find(f->firsthalfedge->P)->second;
 		boost::tie(P2,N2)=info.find(f->firsthalfedge->next->P)->second;
@@ -471,7 +471,67 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 				}
 			}
 		}
-		if (b1){
+		vector<halfedge*> ee;
+		if (b1 && (!b2) && (!b3)){
+			ee.push_back(f->firsthalfedge);
+		}
+		if (b2 && (!b3) && (!b1)){
+			ee.push_back(f->firsthalfedge->next);
+		}
+		if (b3 && (!b1) && (!b2)){
+			ee.push_back(f->firsthalfedge->next->next);
+		}
+		if (b1&&b2){
+			ee.push_back(f->firsthalfedge);
+			ee.push_back(f->firsthalfedge->next);
+		}
+		if (b2&&b3){
+			ee.push_back(f->firsthalfedge->next);
+			ee.push_back(f->firsthalfedge->next->next);
+		}
+		if (b3&&b1){
+			ee.push_back(f->firsthalfedge->next->next);
+			ee.push_back(f->firsthalfedge->next->next->next);
+		}
+		for (auto e : ee){
+			//use LDIV
+			Eigen::Vector3d P1, P2, P3, N1, N2, N3, P1out, P1in, P2out, P2in, P3out, P3in, _P1, _P2, _P3; //Position,Normal
+			boost::tie(P1, N1) = info.find(e->P)->second;
+			boost::tie(P2, N2) = info.find(e->next->P)->second;
+			boost::tie(P3, N3) = info.find(e->next->next->P)->second;
+			
+			P1in = P1 + N1*t*0.4;
+			P2in = P2 + N2*t*0.4;
+			P3in = P3 + N3*t*0.4;
+			P1out = P1 - N1*t*0.4;
+			P2out = P2 - N2*t*0.4;
+			P3out = P3 - N3*t*0.4;
+			auto T23in = P3in - P2in;
+			auto T13in = P3in - P1in;
+			auto T23out = P3out - P2out;
+			auto T13out = P3out - P1out;
+			double sv = ((double)1) / ((double)LDIV);
+			auto _P1in = P1in + T13in*sv;
+			auto _P2in = P2in + T23in*sv;
+			auto _P1out = P1out + T13out*sv;
+			auto _P2out = P2out + T23out*sv;
+			int TDIV = (int)(t / baseRes);
+			if (TDIV < 4)TDIV = 4;
+
+			for (int u = 1; u < LDIV - 1; u++)
+			{
+				for (int s = 0; s <= TDIV; s++)
+				{
+					double su = ((double)u) / ((double)(LDIV - 1));//offset by one
+					auto T12in = _P2in - _P1in;
+					auto pin = _P1in + T12in*su;
+					auto T12out = _P2out - _P1out;
+					auto pout = _P1out + T12out*su;
+					auto D = pout - pin;
+					auto p = pin + D*s / ((double)TDIV);
+					exterior.push_back(std::make_pair(Point(p.x(), p.y(), p.z()), col_int(col, -1)));
+				}
+			}
 
 		}
 	}
@@ -491,7 +551,7 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 			Eigen::Vector3d PQin = Qin - Pin;
 			Eigen::Vector3d PQout = Qout - Pout;
 			double uL = std::max(PQin.norm(), PQout.norm());
-			double vL = std::max(N1.norm(), N2.norm());
+			double vL = t;
 			int UDIV = (int)(uL / baseRes);
 			int VDIV = (int)(vL / baseRes);
 			if (UDIV < 4)UDIV = 4;
@@ -506,7 +566,7 @@ void generate_exterior2(boost::tuple<double, GeometryProcessing::MeshStructure*,
 				{
 					double uss = ((double)us) / ((double)UDIV);
 					p = Pt + PQ*uss;
-					exterior.push_back(std::make_pair(Point(p.x(), p.y(), p.z()), col_int(col, -1)));
+					exterior.push_back(std::make_pair(Point(p.x(), p.y(), p.z()), col_int(CGAL::RED, -1)));
 				}
 			}
 			e = e->next;
@@ -784,6 +844,9 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 			for (vector<face*>::iterator itr = begin; itr != end; itr++)
 			{
 				face *f = *itr;
+				bool b1 = f->firsthalfedge->pair->isBoundary();
+				bool b2 = f->firsthalfedge->next->pair->isBoundary();
+				bool b3 = f->firsthalfedge->next->next->pair->isBoundary();
 				Eigen::Vector3d P1, P2, P3, N1, N2, N3, P1out, P1in, P2out, P2in, P3out, P3in, _P1, _P2, _P3; //Position,Normal
 				boost::tie(P1, N1) = info.find(f->firsthalfedge->P)->second;
 				boost::tie(P2, N2) = info.find(f->firsthalfedge->next->P)->second;
@@ -851,6 +914,73 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 
 				}
 				cs.unlock();
+				vector<halfedge*> ee;
+				if (b1 && (!b2) && (!b3)){
+					ee.push_back(f->firsthalfedge);
+				}
+				if (b2 && (!b3) && (!b1)){
+					ee.push_back(f->firsthalfedge->next);
+				}
+				if (b3 && (!b1) && (!b2)){
+					ee.push_back(f->firsthalfedge->next->next);
+				}
+				if (b1&&b2){
+					ee.push_back(f->firsthalfedge);
+					ee.push_back(f->firsthalfedge->next);
+				}
+				if (b2&&b3){
+					ee.push_back(f->firsthalfedge->next);
+					ee.push_back(f->firsthalfedge->next->next);
+				}
+				if (b3&&b1){
+					ee.push_back(f->firsthalfedge->next->next);
+					ee.push_back(f->firsthalfedge->next->next->next);
+				}
+				for (auto e : ee){
+					//use LDIV
+					Eigen::Vector3d P1, P2, P3, N1, N2, N3, P1out, P1in, P2out, P2in, P3out, P3in, _P1, _P2, _P3; //Position,Normal
+					boost::tie(P1, N1) = info.find(e->P)->second;
+					boost::tie(P2, N2) = info.find(e->next->P)->second;
+					boost::tie(P3, N3) = info.find(e->next->next->P)->second;
+
+					P1in = P1 + N1*t*0.45;
+					P2in = P2 + N2*t*0.45;
+					P3in = P3 + N3*t*0.45;
+					P1out = P1 - N1*t*0.45;
+					P2out = P2 - N2*t*0.45;
+					P3out = P3 - N3*t*0.45;
+					auto T23in = P3in - P2in;
+					auto T13in = P3in - P1in;
+					auto T23out = P3out - P2out;
+					auto T13out = P3out - P1out;
+					double sv = ((double)0.25) / ((double)LDIV);
+					auto _P1in = P1in + T13in*sv;
+					auto _P2in = P2in + T23in*sv;
+					auto _P1out = P1out + T13out*sv;
+					auto _P2out = P2out + T23out*sv;
+					int TDIV = (int)(t / baseRes);
+					if (TDIV < 4)TDIV = 4;
+					TDIV *= 4;
+					__int64 nI = 0;
+					int LLDIV = LDIV * 4;
+					for (double u = 1; u <= LLDIV - 2; u+=0.25)
+					{
+						for (int s = 0; s <= TDIV; s++)
+						{
+							double su = ((double)u) / ((double)(LLDIV - 1.));//offset by one
+							auto T12in = _P2in - _P1in;
+							auto pin = _P1in + T12in*su;
+							auto T12out = _P2out - _P1out;
+							auto pout = _P1out + T12out*su;
+							auto D = pout - pin;
+							auto p = pin + D*s / ((double)TDIV);
+							//exterior.push_back(std::make_pair(Point(p.x(), p.y(), p.z()), col_int(col, -1)));
+							myInfo->p = Point(p.x(), p.y(), p.z());
+							func(*myInfo, nI);
+						}
+					}
+
+				}
 			}
 		});
 		delete [] myInfo;

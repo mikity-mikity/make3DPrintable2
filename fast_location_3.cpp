@@ -676,49 +676,67 @@ void generate_exterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &ec
 					col = CGAL::BLUE;
 				}
 				exterior.push_back(std::make_pair(Point((*itrC).x()*(1 - s) + (*(itrC + 1)).x()*s, (*itrC).y()*(1 - s) + (*(itrC + 1)).y()*s, (*itrC).z()*(1 - s) + (*(itrC + 1)).z()*s),col_int(col, -1)));
-				for(int i=0;i<RDIV;i++)
+				
+				if ((itrC == _branch->begin() && ss == 0) || (itrC == itrEnd&&ss == DIV2 - 1))
 				{
-					double theta=(double)(i)/RDIV*2.*PI;
+					for (double sss = 0.2; sss <= 1.0; sss += 0.2)
+					{
+						for (int i = 0; i < RDIV; i++)
+						{
+							double theta = (double)(i) / RDIV*2.*PI;
 
-					Vector BI=0.8*Radius*(beforeX*std::cos(theta)+beforeY*std::sin(theta));
-					Vector BE=1.00*Radius*(beforeX*std::cos(theta)+beforeY*std::sin(theta));
+							Vector BE = sss*Radius*(beforeX*std::cos(theta) + beforeY*std::sin(theta));
 
-					//Project N
-					double cI1=-(BI*itrD->Normal)/(V*itrD->Normal);
-					double cI2=-(BI*(itrD+1)->Normal)/(V*(itrD+1)->Normal);
-					double cE1=-(BE*itrD->Normal)/(V*itrD->Normal);
-					double cE2=-(BE*(itrD+1)->Normal)/(V*(itrD+1)->Normal);
-					Vector tmpI1=BI+cI1*V;
-					Vector tmpI2=BI+cI2*V;
-					Vector tmpE1=BE+cE1*V;
-					Vector tmpE2=BE+cE2*V;
-					Point DI1=(*itrC)+tmpI1;
-					Point DI2=(*(itrC+1))+tmpI2;
-					Point DE1=(*itrC)+tmpE1;
-					Point DE2=(*(itrC+1))+tmpE2;
-					if (itrC == _branch->begin() && ss == 0)
-					{
-						col = CGAL::RED;
-					}
-					else if (itrC == itrEnd&&ss == DIV2 - 1)
-					{
-						col = CGAL::RED;
-					}
-					else
-					{
-						col = CGAL::BLUE;
-					}
+							//Project N
+							double cE1 = -(BE*itrD->Normal) / (V*itrD->Normal);
+							double cE2 = -(BE*(itrD + 1)->Normal) / (V*(itrD + 1)->Normal);
+							Vector tmpE1 = BE + cE1*V;
+							Vector tmpE2 = BE + cE2*V;
+							Point DE1 = (*itrC) + tmpE1;
+							Point DE2 = (*(itrC + 1)) + tmpE2;
 
-					if(itrC==itrEnd)
+							Point DE(DE2.x()*s + DE1.x()*(1 - s), DE2.y()*s + DE1.y()*(1 - s), DE2.z()*s + DE1.z()*(1 - s));
+							exterior.push_back(std::make_pair(DE, col_int(CGAL::RED, -1)));
+						}
+					}
+				}
+				else
+				{
+					for (int i = 0; i < RDIV; i++)
 					{
-						Point DI(DI2.x()*s+DI1.x()*(1-s),DI2.y()*s+DI1.y()*(1-s),DI2.z()*s+DI1.z()*(1-s));
-						Point DE(DE2.x()*s+DE1.x()*(1-s),DE2.y()*s+DE1.y()*(1-s),DE2.z()*s+DE1.z()*(1-s));
-						exterior.push_back(std::make_pair(DI, col_int(col, -1)));
-						exterior.push_back(std::make_pair(DE, col_int(CGAL::RED, -1)));
-					}else
-					{
-						Point DI(DI2.x()*s+DI1.x()*(1-s),DI2.y()*s+DI1.y()*(1-s),DI2.z()*s+DI1.z()*(1-s));
-						Point DE(DE2.x()*s+DE1.x()*(1-s),DE2.y()*s+DE1.y()*(1-s),DE2.z()*s+DE1.z()*(1-s));
+						double theta = (double)(i) / RDIV*2.*PI;
+
+						Vector BI = 0.8*Radius*(beforeX*std::cos(theta) + beforeY*std::sin(theta));
+						Vector BE = 1.00*Radius*(beforeX*std::cos(theta) + beforeY*std::sin(theta));
+
+						//Project N
+						double cI1 = -(BI*itrD->Normal) / (V*itrD->Normal);
+						double cI2 = -(BI*(itrD + 1)->Normal) / (V*(itrD + 1)->Normal);
+						double cE1 = -(BE*itrD->Normal) / (V*itrD->Normal);
+						double cE2 = -(BE*(itrD + 1)->Normal) / (V*(itrD + 1)->Normal);
+						Vector tmpI1 = BI + cI1*V;
+						Vector tmpI2 = BI + cI2*V;
+						Vector tmpE1 = BE + cE1*V;
+						Vector tmpE2 = BE + cE2*V;
+						Point DI1 = (*itrC) + tmpI1;
+						Point DI2 = (*(itrC + 1)) + tmpI2;
+						Point DE1 = (*itrC) + tmpE1;
+						Point DE2 = (*(itrC + 1)) + tmpE2;
+						if (itrC == _branch->begin() && ss == 0)
+						{
+							col = CGAL::RED;
+						}
+						else if (itrC == itrEnd&&ss == DIV2 - 1)
+						{
+							col = CGAL::RED;
+						}
+						else
+						{
+							col = CGAL::BLUE;
+						}
+
+						Point DI(DI2.x()*s + DI1.x()*(1 - s), DI2.y()*s + DI1.y()*(1 - s), DI2.z()*s + DI1.z()*(1 - s));
+						Point DE(DE2.x()*s + DE1.x()*(1 - s), DE2.y()*s + DE1.y()*(1 - s), DE2.z()*s + DE1.z()*(1 - s));
 						exterior.push_back(std::make_pair(DI, col_int(col, -1)));
 						exterior.push_back(std::make_pair(DE, col_int(CGAL::RED, -1)));
 					}

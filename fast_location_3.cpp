@@ -1089,7 +1089,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		{
 			double theta1 = 2.*PI*((double)i) / ((double)RDIV);
 			double theta2 = 2.*PI*((double)i + 1) / ((double)RDIV);
-			for (double s = 0.05; s < 0.95; s+=0.05)
+			for (double s = 0.01; s <= 0.97; s+=0.02)
 			{
 				Point point1(s * R2*std::cos(theta1), R2*std::sin(theta1), 0);
 				Point point2(s * R2*std::cos(theta2), R2*std::sin(theta2), 0);
@@ -1120,7 +1120,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 			else{
 				myInfo->DIV = (int)(Length / baseRes) + 1;
 			}
-			myInfo->DIV *= 5;
+			myInfo->DIV *= 8;
 			__int64 __nI = 0;
 			func(*myInfo, __nI, midparticles, firstandlastparticles);
 			cs.lock();

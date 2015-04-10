@@ -1068,7 +1068,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		//double dx = edge / YDIV;
 		myInfo->particles.clear();
 		vector<Point> midparticles;
-		double tt[7] = { 0.97, 0.95,0.93,0.9,0.87,0.84,0.81 };
+		double tt[7] = { 0.98, 0.95,0.93,0.9,0.87,0.84,0.81 };
 		for (int i = 0; i < RDIV; i++)
 		{
 			double theta1 = 2.*PI*((double)i) / ((double)RDIV);
@@ -1077,9 +1077,9 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 			{
 				Point point1(tt[k] * R2*std::cos(theta1), R2*std::sin(theta1), 0);
 				Point point2(tt[k] * R2*std::cos(theta2), R2*std::sin(theta2), 0);
-				for (int j = 0; j < 12; j++)
+				for (int j = 0; j < 24; j++)
 				{
-					Point v = point1 + (point2 - point1)*(((double)j) / 12.);
+					Point v = point1 + (point2 - point1)*(((double)j) / 24.);
 					midparticles.push_back(v);
 				}
 			}
@@ -1089,13 +1089,13 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		{
 			double theta1 = 2.*PI*((double)i) / ((double)RDIV);
 			double theta2 = 2.*PI*((double)i + 1) / ((double)RDIV);
-			for (double s = 0.01; s <= 0.97; s+=0.02)
+			for (double s = 0.02; s <= 0.98; s+=0.02)
 			{
 				Point point1(s * R2*std::cos(theta1), R2*std::sin(theta1), 0);
 				Point point2(s * R2*std::cos(theta2), R2*std::sin(theta2), 0);
-				for (int j = 0; j < 12; j++)
+				for (int j = 0; j < 24; j++)
 				{
-					Point v = point1 + (point2 - point1)*(((double)j) / 12.);
+					Point v = point1 + (point2 - point1)*(((double)j) / 24.);
 					firstandlastparticles.push_back(v);
 				}
 			}
@@ -1120,7 +1120,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 			else{
 				myInfo->DIV = (int)(Length / baseRes) + 1;
 			}
-			myInfo->DIV *= 8;
+			myInfo->DIV *= 16;
 			__int64 __nI = 0;
 			func(*myInfo, __nI, midparticles, firstandlastparticles);
 			cs.lock();

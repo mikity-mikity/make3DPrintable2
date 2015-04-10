@@ -1008,9 +1008,8 @@ __int64 computeInterior2(vector<boost::tuple<double,GeometryProcessing::MeshStru
 	//std::cin.get();
 	return numInterior;
 }
-__int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &eclipseTree, double baseRes, std::function<void(info&,__int64&)>func,__int64 nsize)
+__int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &eclipseTree, double baseRes, std::function<void(info&, __int64&, vector<Point>&, vector<Point>&)>func, __int64 nsize)
 {
-
 	vector<Rad_branch>::iterator __itrA = data.begin();
 	vector<eclipses*>::iterator __itrB = eclipseTree.begin();
 	__int64 numInterior=0;
@@ -1068,6 +1067,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 		//double edge = 2 * std::sin(alpha)*Radius;
 		//double dx = edge / YDIV;
 		myInfo->particles.clear();
+		vector<Point> midparticles;
 		double tt[7] = { 0.97, 0.95,0.93,0.9,0.87,0.84,0.81 };
 		for (int i = 0; i < RDIV; i++)
 		{
@@ -1080,38 +1080,31 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 				for (int j = 0; j < 12; j++)
 				{
 					Point v = point1 + (point2 - point1)*(((double)j) / 12.);
-					myInfo->particles.push_back(v);
+					midparticles.push_back(v);
 				}
 			}
 		}
-
-		/*for (double i = -Radius; i < Radius; i += dx)
+		vector<Point> firstandlastparticles;
+		for (int i = 0; i < RDIV; i++)
 		{
-			for (double j = -Radius; j < Radius; j += dx)
+			double theta1 = 2.*PI*((double)i) / ((double)RDIV);
+			double theta2 = 2.*PI*((double)i + 1) / ((double)RDIV);
+			for (double s = 0.05; s < 0.95; s+=0.05)
 			{
-				Vector V(i, j, 0);
-				bool flag = true;
-				for (auto T = vectors.begin(); T != vectors.end(); T++)
+				Point point1(s * R2*std::cos(theta1), R2*std::sin(theta1), 0);
+				Point point2(s * R2*std::cos(theta2), R2*std::sin(theta2), 0);
+				for (int j = 0; j < 12; j++)
 				{
-					if ((*T)*V < R2*R2)
-					{
-						continue;
-					}
-					else
-					{
-						flag = false;
-						break;
-					}
-
+					Point v = point1 + (point2 - point1)*(((double)j) / 12.);
+					firstandlastparticles.push_back(v);
 				}
-				if (flag)
-					myInfo->particles.push_back(Point(i, j, 0));
 			}
-		}*/
+		}
 		std::cout << taskNum << ":particles.size()" << myInfo->particles.size() << endl;
 		std::cout << taskNum << ":_branch.size()" << myInfo->branch->size() << endl;
-
-		while (myInfo->itrC != myInfo->branch->end() - 1)
+		auto end = myInfo->branch->end();
+		end--;
+		while (myInfo->itrC != end)
 		{
 			//Division number along line
 			Point P = *myInfo->itrC;
@@ -1129,7 +1122,7 @@ __int64 computeInterior(std::vector<Rad_branch> &data, std::vector<eclipses*> &e
 			}
 			myInfo->DIV *= 5;
 			__int64 __nI = 0;
-			func(*myInfo,__nI);
+			func(*myInfo, __nI, midparticles, firstandlastparticles);
 			cs.lock();
 			numInterior += __nI;
 			while(numInterior >= next)
@@ -1226,7 +1219,7 @@ int main(int argc, char *argv[])
 	//compute total number of interior points
 	if (nPolyline > 0)
 	{
-		__int64 size = computeInterior(data, eclipseTree, baseRes, [](info& myInfo, __int64& numInterior){
+		__int64 size = computeInterior(data, eclipseTree, baseRes, [](info& myInfo, __int64& numInterior, vector<Point>& particles1, vector<Point>& particles2){
 			for (double ss = 0.5; ss < myInfo.DIV; ss++)
 			{
 				for (auto particle = myInfo.particles.begin(); particle != myInfo.particles.end(); particle++)
@@ -1238,10 +1231,23 @@ int main(int argc, char *argv[])
 
 		std::cout << "interior.size():" << size << endl;
 
-		computeInterior(data, eclipseTree, baseRes, [&cells, &T](info& myInfo, __int64& numInterior){
+		computeInterior(data, eclipseTree, baseRes, [&cells, &T](info& myInfo, __int64& numInterior, vector<Point>& particles1, vector<Point>& particles2){
 
 			Cell_handle c;
-
+			auto end = myInfo.branch->end();
+			end--;
+			end--;
+			if (myInfo.itrC == myInfo.branch->begin())
+			{
+				myInfo.particles = particles2;
+			}
+			else if (myInfo.itrC == end)
+			{
+				myInfo.particles = particles2;
+			}
+			else{
+				myInfo.particles = particles1;
+			}
 			if (myInfo.itrC == myInfo.branch->begin())
 			{
 				Vector Z(0, 0, 1);

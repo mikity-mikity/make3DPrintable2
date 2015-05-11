@@ -161,13 +161,14 @@ boost::tuple<double,GeometryProcessing::MeshStructure*,std::map<vertex*,boost::t
 	delete[] normalPerFaces;
 	return boost::make_tuple(t,MS,output);
 }
-boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,std::vector<Thick_mesh> &mData)
+boost::tuple<double,double,double> read(string filename,std::vector<Rad_branch> &data,std::vector<Thick_mesh> &mData)
 {
 	branch* _branch;
 	Mesh* _mesh;
 	string line;
 	double R;
 	double T;
+	double bR = 0.0;
 	int N;
 	int nV,nF;
 	// read file
@@ -190,6 +191,12 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		if (prefix == "G")
 		{
 			sscanf(words[1].data(), "%lf", &scale);
+
+		}
+		if (prefix == "BR")
+		{
+			sscanf(words[1].data(), "%lf", &bR);
+			bR *= scale;
 
 		}
 		if (prefix == "P")
@@ -240,7 +247,7 @@ boost::tuple<double,double> read(string filename,std::vector<Rad_branch> &data,s
 		}	
 	}
 	ifs.close();
-	return boost::make_tuple(minR,minT);
+	return boost::make_tuple(minR,minT,bR);
 }
 void generate_eclipseTree(std::vector<Rad_branch> &data,std::vector<eclipses*> &eclipseTree)
 {
@@ -1162,9 +1169,10 @@ int main(int argc, char *argv[])
 
 	std::vector<Rad_branch> data;
 	std::vector<Thick_mesh> mData;
-	double minR, minT;
-	boost::tie(minR, minT) = read(filename, data, mData);
+	double minR, minT,__bR;
+	boost::tie(minR, minT,__bR) = read(filename, data, mData);
 	double baseRes = std::min(minT / 4., minR * 2 * PI / 12.);
+	if (__bR != 0.0)baseRes = __bR;
 	cout << "baseRes=" << baseRes << endl;
 	std::vector<boost::tuple<double, Mesh*, GeometryProcessing::MeshStructure*>> meshStructures;
 

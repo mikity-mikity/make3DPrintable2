@@ -1156,11 +1156,12 @@ int main(int argc, char *argv[])
 {
 	if (argc < 2)return 0;
 	string filename = argv[1];   //input filename
-	std::vector<string> left_right;
+	//std::vector<string> left_right;
 
-	boost::algorithm::split(left_right, filename, boost::algorithm::is_any_of("."));
-	string NAME = left_right[0];
-
+	//boost::algorithm::split(left_right, filename, boost::algorithm::is_any_of("."));
+	//string NAME = left_right[0];
+	size_t index = filename.find_last_of(".");
+	string NAME = filename.substr(0, index);
 	PI = boost::math::constants::pi<double>();
 	std::cout << "start reading file" << "[" << filename << "]" << endl;
 
